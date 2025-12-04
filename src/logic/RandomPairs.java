@@ -10,7 +10,7 @@ import java.util.ArrayList;
  import java.util.Set;
 /**
  *
- * @author Nour
+ * @author Ali
  */
 public class RandomPairs {
     // Range 0..80 for both x and y

@@ -4,10 +4,17 @@
  */
 package logic;
 
+import board.SudokuBoard;
+
 /**
  *
- * @author Nour
+ * @author Ali
  */
 public class Solver {
-    
+
+    public Solver() {
+    }
+    public static boolean solve()
+    SudokuBoard board=new SudokuBoard();
+    int[][] empties=board.findEmptyCells(board);
 }
