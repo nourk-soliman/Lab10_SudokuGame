@@ -6,8 +6,24 @@ package model;
 
 /**
  *
- * @author Nour
+ * @author Mariam
  */
 public class Game {
-    
+    private int[][] board;
+    private DifficultyEnum difficulty;
+
+  public Game(int[][] board, DifficultyEnum difficulty) {
+        this.board = board;
+        this.difficulty = difficulty;
+    }
+    public int[][] getBoard() {
+        return board;
+    }   
+    public DifficultyEnum getDifficulty() {
+        return difficulty;
+    }
+
+    public void setBoard(int[][] board) {
+        this.board = board;
+    }
 }
