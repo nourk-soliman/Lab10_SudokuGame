@@ -6,8 +6,11 @@ package exceptions;
 
 /**
  *
- * @author Nour
+ * @author Mariam
  */
-public class InvalidGame {
+public class InvalidGame extends Exception {
+    public InvalidGame(String message) {
+        super(message);
+    }
     
 }
