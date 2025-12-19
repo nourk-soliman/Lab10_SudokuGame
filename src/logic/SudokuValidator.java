@@ -4,18 +4,20 @@
  */
 package logic;
 
+import exceptions.SolutionInvalidException;
+
 /**
  *
  * @author Mariam
  */
 public class SudokuValidator {
 
-      public void validateSourceSolution(int[][] board){
+      public void validateSourceSolution(int[][] board) throws SolutionInvalidException{
         if (!isBoardValid(board)) {
-            throw new IllegalArgumentException("The Sudoku solution is invalid.");
+            throw new SolutionInvalidException("The Sudoku solution is invalid.");
         }
         if (!isComplete(board)) {
-            throw new IllegalArgumentException("The Sudoku board is not complete.");
+            throw new SolutionInvalidException("The Sudoku board is not complete.");
         }
         System.out.println("The Sudoku solution is valid.");
         
@@ -105,3 +107,4 @@ public class SudokuValidator {
     }
 
 }
+
