@@ -6,8 +6,11 @@ package exceptions;
 
 /**
  *
- * @author Nour
+ * @author Mariam
  */
-public class SolutionInvalidException {
+public class SolutionInvalidException extends Exception {
+    public SolutionInvalidException(String message) {
+        super(message);
+    }
     
 }
