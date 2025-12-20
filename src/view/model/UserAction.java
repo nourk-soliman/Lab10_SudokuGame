@@ -20,5 +20,23 @@ public class UserAction {
         this.value = value;
         this.previous = previous;
     }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getColomn() {
+        return colomn;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public int getPrevious() {
+        return previous;
+    }
+    
+    
     
 }
