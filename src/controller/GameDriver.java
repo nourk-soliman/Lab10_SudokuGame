@@ -4,13 +4,14 @@
  */
 package controller;
 
+import controller.exceptions.SolutionInvalidException;
+import controller.logic.RandomPairs;
+import controller.logic.SudokuValidator;
+import controller.model.DifficultyEnum;
+import controller.model.Game;
 import java.util.List;
 
-import exceptions.SolutionInvalidException;
-import logic.RandomPairs;
-import logic.SudokuValidator;
-import model.DifficultyEnum;
-import model.Game;
+
 
 /**
  *
@@ -76,3 +77,4 @@ public class GameDriver {
     }
 
 }
+

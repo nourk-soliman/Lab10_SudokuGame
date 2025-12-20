@@ -3,15 +3,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package controller;
-import exceptions.InvalidGame;
-import exceptions.NotFoundException;
-import exceptions.SolutionInvalidException;
+import controller.exceptions.InvalidGame;
+import controller.exceptions.NotFoundException;
+import controller.exceptions.SolutionInvalidException;
 import java.io.File;
-import system.GameCatalog;
-import interfaces.Viewable;
+import controller.system.GameCatalog;
 import java.io.IOException;
-import model.DifficultyEnum;
-import model.Game;
+import controller.model.DifficultyEnum;
+import controller.model.Game;
 
 /**
  *
