@@ -1,10 +1,12 @@
-package controller.csv;
+package utils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
-public class CSVGameHandler {
+public class CSVReader {
 
     public static int[][] readCSV(String filename) throws IOException {
         int[][] board = new int[9][9];
@@ -36,5 +38,16 @@ public class CSVGameHandler {
         }
 
         return board;
+    }
+    public static void writeCSV(String filename, int[][] board) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            for (int r = 0; r < 9; r++) {
+                for (int c = 0; c < 9; c++) {
+                    writer.write(String.valueOf(board[r][c]));
+                    if (c < 8) writer.write(","); // فواصل بين الأعمدة
+                }
+                writer.newLine();
+            }
+        }
     }
 }
