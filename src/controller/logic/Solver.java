@@ -1,7 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package controller.logic;
 
-import controller.board.SudokuBoard;
 import controller.exceptions.SolutionInvalidException;
+import controller.model.Game;
+
+
 
 public class Solver {
 
@@ -11,8 +17,8 @@ public class Solver {
     public static boolean solve(int[][] board) {
 
         // Get the 5 empty cell positions as Flyweight objects
-        SudokuBoard sudokuBoard = new SudokuBoard();
-        CellFlyweight[] emptyCells = sudokuBoard.findEmptyCells(board);
+        Game game = new Game();
+        CellFlyweight[] emptyCells = game.findEmptyCells(board);
 
         PermutationIterator iterator = new PermutationIterator();
         SudokuValidator validator = new SudokuValidator();
@@ -50,4 +56,3 @@ public class Solver {
         return false;
     }
 }
-
