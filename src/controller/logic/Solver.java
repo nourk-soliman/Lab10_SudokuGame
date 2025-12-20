@@ -1,7 +1,7 @@
 package controller.logic;
 
-import board.SudokuBoard;
-import exceptions.SolutionInvalidException;
+import controller.board.SudokuBoard;
+import controller.exceptions.SolutionInvalidException;
 
 public class Solver {
 
