@@ -17,7 +17,7 @@ public class Solver {
     public static boolean solve(int[][] board) {
 
         // Get the 5 empty cell positions as Flyweight objects
-        Game game = new Game();
+        Game game = new Game(board);
         CellFlyweight[] emptyCells = game.findEmptyCells(board);
 
         PermutationIterator iterator = new PermutationIterator();

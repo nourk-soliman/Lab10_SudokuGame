@@ -11,12 +11,21 @@ import controller.system.GameCatalog;
 import java.io.IOException;
 import controller.model.DifficultyEnum;
 import controller.model.Game;
+import controller.system.GameStorage;
 
 /**
  *
  * @author Nour
  */
 public  class GameController implements Viewable {
+
+    
+    private final GameDriver driver ;
+    private final GameStorage storage;
+    public GameController(controller.GameDriver driver, controller.system.GameStorage storage) {
+        this.driver = driver;
+        this.storage = storage;
+    }  
     
     @Override
     public GameCatalog getCatalog(){
@@ -47,17 +56,38 @@ public  class GameController implements Viewable {
 
     @Override
     public Game getGame(DifficultyEnum level) throws NotFoundException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    Game game = storage.readGame(level);
+        if (game == null) {
+            throw new NotFoundException("No game found for level: " + level);
+        }
+        return game; }
 
     @Override
     public void driveGames(Game sourceGame) throws SolutionInvalidException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+   if (sourceGame == null) {
+            throw new SolutionInvalidException("Source game is null");
+        }
+        driver.generateFromSolved(sourceGame.getBoard()); 
     }
 
     @Override
     public String verifyGame(Game game) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+   try {
+            driver.verifySolution(game.getBoard());
+            // check if there are zeros -> incomplete
+            boolean incomplete = false;
+            for (int i = 0; i < 9 && !incomplete; i++) {
+                for (int j = 0; j < 9; j++) {
+                    if (game.getBoard()[i][j] == 0) {
+                        incomplete = true;
+                        break;
+                    }
+                }
+            }
+            return incomplete ? "incomplete" : "valid";
+        } catch (SolutionInvalidException e) {
+            return e.getMessage(); 
+        }
     }
 
     @Override
@@ -72,7 +102,7 @@ public  class GameController implements Viewable {
         
     //testing the catalog method
         public static void main(String[] args) {
-        GameController controller=new GameController();
+        GameController controller=new GameController(null, null);
         GameCatalog catalog=controller.getCatalog();
         System.out.println("Current: "+catalog.isCurrent()+" allModes: "+catalog.isAllModesExist());
     }

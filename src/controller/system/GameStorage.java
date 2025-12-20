@@ -14,7 +14,7 @@ import controller.model.DifficultyEnum;
 public class GameStorage {
     
     public Game readCurrentGame(){
-        GameController controller=new GameController();
+        GameController controller=new GameController(null, null);
         GameCatalog catalog=controller.getCatalog();
         if(!catalog.isCurrent())
         {return null;}
@@ -24,7 +24,7 @@ public class GameStorage {
     }
         
    public Game readGame(DifficultyEnum difficultyChoice){
-     GameController controller=new GameController();
+     GameController controller=new GameController(null, null);
      GameCatalog catalog=controller.getCatalog();
      if(!catalog.isAllModesExist()){
          return null;
