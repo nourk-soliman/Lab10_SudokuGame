@@ -4,7 +4,7 @@
  */
 package controller.system;
 import controller.model.Game;
-import controller.csv.CSVGameHandler;
+import controller.csv.CSVReader;
 /**
  *
  * @author Nour
@@ -12,7 +12,8 @@ import controller.csv.CSVGameHandler;
 public class GameStorage {
     
     public Game readCurrentGame(){
-        CSVGameHandler handler=new CSVGameHandler();
+        CSVReader handler=new CSVReader();
+        return null;
         
     }
     
