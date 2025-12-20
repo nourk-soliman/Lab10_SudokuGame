@@ -6,19 +6,21 @@ package controller;
 import exceptions.InvalidGame;
 import exceptions.NotFoundException;
 import exceptions.SolutionInvalidException;
-import interfaces.*;
 import java.io.File;
+import system.GameCatalog;
+import interfaces.Viewable;
 import java.io.IOException;
+import model.DifficultyEnum;
+import model.Game;
 
 /**
  *
  * @author Nour
  */
-public  class GameController implements Controllable {
+public  class GameController implements Viewable {
     
     @Override
-    public boolean[] getCatalog(){
-        boolean[] catalog=new boolean[2];
+    public GameCatalog getCatalog(){
         String basePath="N:\\Term 5\\Programming 2\\SudokuGame\\";
         String[]difficultyPaths={"easy","medium","hard"};
         
@@ -37,43 +39,43 @@ public  class GameController implements Controllable {
        {allModesExist=false;
        break;}
        }
-       catalog[0]=current;
-       catalog[1]=allModesExist;
+       GameCatalog catalog=new GameCatalog(current,allModesExist);
        return catalog;
        }
-   
-
-    @Override
-    public int[][] getGame(char level) throws NotFoundException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void driveGames(String sourcePath) throws SolutionInvalidException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public boolean[][] verifyGame(int[][] game) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public int[][] solveGame(int[][] game) throws InvalidGame {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void logUserAction(Object userAction) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+  
     
-    
+
+
+    @Override
+    public Game getGame(DifficultyEnum level) throws NotFoundException {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void driveGames(Game sourceGame) throws SolutionInvalidException {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public String verifyGame(Game game) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public int[] solveGame(Game game) throws InvalidGame {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void logUserAction(String userAction) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+        
     //testing the catalog method
         public static void main(String[] args) {
         GameController controller=new GameController();
-        boolean[] catalog=controller.getCatalog();
-        System.out.println("Current: "+catalog[0]+" allModes: "+catalog[1]);
+        GameCatalog catalog=controller.getCatalog();
+        System.out.println("Current: "+catalog.isCurrent()+" allModes: "+catalog.isAllModesExist());
     }
     
 }
