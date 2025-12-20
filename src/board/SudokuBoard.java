@@ -6,7 +6,8 @@ package board;
 
 import java.io.IOException;
 import utils.CSVReader;
-
+import logic.CellFlyweight;
+import logic.CellFlyweightFactory;
 /**
  *
  * @author Nour
@@ -55,35 +56,29 @@ public class SudokuBoard {
 
     }
 
-    public int[][] findEmptyCells(int[][] board) {
-        int zeros = 0;
-        for (int r = 0; r < 9; r++) {
-            for (int c = 0; c < 9; c++) {
-                if (board[r][c] == 0) {
-                    zeros++;
-                }
-            }
-        }
-        if (zeros != 5) {
-            throw new IllegalArgumentException("This solver supports puzzles with exactly 5 empty cells. Found: " + zeros);
-        }
+ public CellFlyweight[] findEmptyCells(int[][] board) {
 
-        int[][] empties = new int[5][2];
-        int found = 0;
-        for (int r = 0; r < 9; r++) {
-            for (int c = 0; c < 9; c++) {
-                if (board[r][c] == 0) {
-                    if (found >= 5) {
-                        found++;
-                    } else {
-                        empties[found][0] = r;
-                        empties[found][0] = c;
-                        found++;
-                    }
-
-                }
-            }
+    int zeros = 0;
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            if (board[r][c] == 0) zeros++;
         }
-        return empties;
     }
+
+    if (zeros != 5) {
+        throw new IllegalArgumentException("Exactly 5 empty cells required.");
+    }
+
+    CellFlyweight[] cells = new CellFlyweight[5];
+    int found = 0;
+
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            if (board[r][c] == 0) {
+                cells[found++] = CellFlyweightFactory.getCell(r, c);
+            }
+        }
+    }
+    return cells;
+}
 }
