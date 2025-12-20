@@ -7,6 +7,7 @@ import controller.exceptions.SolutionInvalidException;
 import controller.exceptions.InvalidGame;
 import controller.exceptions.NotFoundException;
 import java.io.IOException;
+import view.model.UserAction;
 
 
 /**
