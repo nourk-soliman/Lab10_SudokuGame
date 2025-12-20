@@ -1,4 +1,4 @@
-package logic;
+package controller.logic;
 
 import board.SudokuBoard;
 import exceptions.SolutionInvalidException;
@@ -50,3 +50,4 @@ public class Solver {
         return false;
     }
 }
+
