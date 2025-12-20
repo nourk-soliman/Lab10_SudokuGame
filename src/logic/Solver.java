@@ -14,7 +14,9 @@ public class Solver {
 
     public Solver() {
     }
-    public static boolean solve()
-    SudokuBoard board=new SudokuBoard();
-    int[][] empties=board.findEmptyCells(board);
+    public static boolean solve(int[][] board){
+    SudokuBoard b=new SudokuBoard();
+    int[][] empties=b.findEmptyCells(board);
+        return false;
+    }
 }
