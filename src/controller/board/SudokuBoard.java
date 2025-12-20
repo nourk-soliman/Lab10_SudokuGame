@@ -4,7 +4,7 @@
  */
 package controller.board;
 
-import controller.csv.CSVReader;
+import controller.csv.CSVGameHandler;
 import controller.logic.CellFlyweight;
 import controller.logic.CellFlyweightFactory;
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class SudokuBoard {
     public void importBoardFromFile(String filename) {
         int[][] newBoard;
         try {
-            newBoard = CSVReader.readCSV(filename);
+            newBoard = CSVGameHandler.readCSV(filename);
             setBoard(newBoard);
         } catch (IOException e) {
             System.out.println("Error in reading file.");
