@@ -12,25 +12,27 @@ import controller.model.Game;
  * @author Nour
  */
 public class GameModeFactory {
-    
-    public Game getGameMode(DifficultyEnum difficultyChoice){
-        GameStorage storage=new GameStorage();
-    if(difficultyChoice==null)
-        return null;
-    if(difficultyChoice==DifficultyEnum.EASY){
-        return storage.importBoardFromFile("N:\\Term 5\\Programming 2\\SudokuGame\\easy");
-        
+
+    public Game getGameMode(DifficultyEnum difficultyChoice) {
+        GameStorage storage = new GameStorage();
+
+        if (difficultyChoice == null) return null;
+
+        switch (difficultyChoice) {
+            case EASY:
+                return storage.importBoardFromFile(
+                    "N:\\Term 5\\Programming 2\\SudokuGame\\easy\\easy.csv"
+                );
+            case MEDIUM:
+                return storage.importBoardFromFile(
+                    "N:\\Term 5\\Programming 2\\SudokuGame\\medium\\medium.csv"
+                );
+            case HARD:
+                return storage.importBoardFromFile(
+                    "N:\\Term 5\\Programming 2\\SudokuGame\\hard\\hard.csv"
+                );
+            default:
+                return null;
+        }
     }
-    
-        if(difficultyChoice==DifficultyEnum.MEDIUM){
-       return storage.importBoardFromFile("N:\\Term 5\\Programming 2\\SudokuGame\\medium");
-        
-    }
-            if(difficultyChoice==DifficultyEnum.HARD){
-        return storage.importBoardFromFile("N:\\Term 5\\Programming 2\\SudokuGame\\hard");
-        
-    }
-            return null;
-    }
-    
 }

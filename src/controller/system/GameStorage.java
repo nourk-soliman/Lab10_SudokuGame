@@ -18,11 +18,9 @@ public class GameStorage {
         GameCatalog catalog=controller.getCatalog();
         if(!catalog.isCurrent())
         {return null;}
-        return importBoardFromFile("N:\\Term 5\\Programming 2\\SudokuGame\\current game");
-        
-     
-        
-              
+         return importBoardFromFile(
+    "N:\\Term 5\\Programming 2\\SudokuGame\\current game\\game.csv"
+);          
     }
         
    public Game readGame(DifficultyEnum difficultyChoice){
@@ -44,18 +42,30 @@ if(filename==null)
     
 }
    
-public void saveGame(String difficulty,Game game){
-    CSVGameHandler.writeCSV("N:\\Term 5\\Programming 2\\SudokuGame\\"+difficulty+"\\easy.csv",game.getBoard());
+public void saveGame(String difficulty, Game game) {
+    CSVGameHandler.writeCSV(
+        "N:\\Term 5\\Programming 2\\SudokuGame\\" 
+        + difficulty + "\\" + difficulty + ".csv",
+        game.getBoard()
+    );
 }
 
-public void updateCurrentGame(String difficulty,Game game){
-    CSVGameHandler.updateCSV("N:\\Term 5\\Programming 2\\SudokuGame\\"+difficulty+"\\medium.csv",game.getBoard());
-    
+public void updateCurrentGame(String difficulty, Game game) {
+    CSVGameHandler.updateCSV(
+        "N:\\Term 5\\Programming 2\\SudokuGame\\" 
+        + difficulty + "\\" + difficulty + ".csv",
+        game.getBoard()
+    );
 }
 
-public void deleteGameFromFolder(String difficulty){
-   CSVGameHandler.deleteCSV("N:\\Term 5\\Programming 2\\SudokuGame\\"+difficulty+"\\hard.csv");  
+public void deleteGameFromFolder(String difficulty) {
+    CSVGameHandler.deleteCSV(
+        "N:\\Term 5\\Programming 2\\SudokuGame\\" 
+        + difficulty + "\\" + difficulty + ".csv"
+    );
 }
+
+
 
 public void deleteCurrentGame(){
     CSVGameHandler.deleteCSV("N:\\Term 5\\Programming 2\\SudokuGame\\current game\\game.csv");
