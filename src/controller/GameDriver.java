@@ -9,6 +9,7 @@ import controller.logic.RandomPairs;
 import controller.logic.SudokuValidator;
 import controller.model.DifficultyEnum;
 import controller.model.Game;
+import controller.system.GameStorage;
 import java.util.List;
 
 
@@ -32,11 +33,12 @@ public class GameDriver {
         Game easyGame = createGame(solvedBoard, DifficultyEnum.EASY); // Remove 10 cells
         Game mediumGame = createGame(solvedBoard, DifficultyEnum.MEDIUM); // Remove 25 cells
         Game hardGame = createGame(solvedBoard, DifficultyEnum.HARD); // Remove 20 cells
+        GameStorage storage=new GameStorage();
 
         //save games
-        saveGame(easyGame);
-        saveGame(mediumGame);
-        saveGame(hardGame);
+        storage.saveGame("easy",easyGame);
+        storage.saveGame("medium",mediumGame);
+        storage.saveGame("hard",hardGame);
     }
 
     public void verifySolution(int[][] board) throws SolutionInvalidException {
@@ -61,7 +63,7 @@ public class GameDriver {
             }
         }
 
-        return new Game(boardCopy, difficulty);
+        return new Game(boardCopy);
     }
 
     //the reason for making a board copy because for example: in the beginning we have a solved board
