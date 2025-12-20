@@ -97,14 +97,35 @@ public  class GameController implements Viewable {
 
     @Override
     public void logUserAction(String userAction) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        LogFileHandler handler=new LogFileHandler();
+        handler.writeToFile(userAction);
     }
         
-    //testing the catalog method
+
+
+    @Override
+    public Game undoLastMove(int[][]board) throws IOException {
+       LogFileHandler handler=new LogFileHandler();
+       String lastMove= handler.readAndRemoveLastMove();
+         lastMove = lastMove.replaceAll("[()]", "");
+        String[] parts = lastMove.split(",");
+        if(parts==null){
+            return null;
+        }
+      int row= Integer.parseInt(parts[0].trim());
+      int colomn=  Integer.parseInt(parts[1].trim());
+      int previous=  Integer.parseInt(parts[3].trim());
+      board[row][colomn]=previous;
+      return new Game(board);
+      
+      
+    }
+        //testing the catalog method
         public static void main(String[] args) {
-        GameController controller=new GameController(null, null);
+        GameController controller=new GameController();
         GameCatalog catalog=controller.getCatalog();
         System.out.println("Current: "+catalog.isCurrent()+" allModes: "+catalog.isAllModesExist());
     }
     
 }
+
