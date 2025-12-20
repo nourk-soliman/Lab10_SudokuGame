@@ -1,11 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package controller.logic;
+package logic;
 
-import controller.board.SudokuBoard;
-import controller.exceptions.SolutionInvalidException;
+import board.SudokuBoard;
+import exceptions.SolutionInvalidException;
 
 public class Solver {
 
