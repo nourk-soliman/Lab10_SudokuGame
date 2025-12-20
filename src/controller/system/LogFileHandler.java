@@ -6,6 +6,7 @@ package controller.system;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -58,6 +59,15 @@ public class LogFileHandler {
             System.out.println("Error in writing file");
         }
         
+    }
+    
+        public  void deleteLog() {
+        File file = new File(filename);
+        if (file.exists() && file.delete()) {
+            System.out.println("Deleted file: " + filename);
+        } else {
+            System.out.println("Failed to delete file: " + filename);
+        }
     }
     
 }
