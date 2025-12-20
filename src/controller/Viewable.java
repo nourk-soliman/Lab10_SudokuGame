@@ -41,4 +41,5 @@ public interface Viewable
   int[] solveGame(Game game) throws InvalidGame;
   // Logs the user action
   void logUserAction(String userAction) throws IOException;
+  Game undoLastMove(int[][]board)throws IOException;
 }
