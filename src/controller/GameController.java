@@ -12,6 +12,7 @@ import java.io.IOException;
 import controller.model.DifficultyEnum;
 import controller.model.Game;
 import controller.system.GameStorage;
+import controller.system.LogFileHandler;
 
 /**
  *
@@ -128,4 +129,5 @@ public  class GameController implements Viewable {
     }
     
 }
+
 
