@@ -4,9 +4,10 @@ import view.adapter.Controllable;
 import view.adapter.ControllerAdapter;
 import controller.GameController;
 import controller.GameDriver;
-import controller.system.GameStorage;
+import controller.Viewable;
 import controller.exceptions.NotFoundException;
 import controller.exceptions.SolutionInvalidException;
+import controller.system.GameStorage;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,228 +16,199 @@ import java.io.File;
 public class MenuGUI extends JFrame {
     
     private Controllable controller;
-    private JButton easyBtn, mediumBtn, hardBtn, loadSolvedBtn, exitBtn;
+    private JButton continueBtn, easyBtn, mediumBtn, hardBtn, loadSolvedBtn, exitBtn;
     private JLabel titleLabel;
     private JPanel mainPanel, buttonPanel;
-    private boolean hasIncomplete;
-    private boolean hasAllModes;
+    
+    private final Color BG_COLOR = new Color(45, 52, 54);
+    private final Color TITLE_COLOR = new Color(0, 206, 201);
+    private final Color CONTINUE_BTN = new Color(46, 213, 115);
+    private final Color EASY_BTN = new Color(129, 236, 236);
+    private final Color MEDIUM_BTN = new Color(250, 211, 144);
+    private final Color HARD_BTN = new Color(255, 159, 128);
+    private final Color LOAD_BTN = new Color(108, 117, 125);
+    private final Color EXIT_BTN = new Color(222, 165, 164);
 
     public MenuGUI() {
-        GameDriver driver = new GameDriver();
         GameStorage storage = new GameStorage();
-        GameController gameController = new GameController(driver, storage);
+        GameDriver driver = new GameDriver();
+        Viewable gameController = new GameController(driver, storage);
         this.controller = new ControllerAdapter(gameController);
         
-        checkGameCatalog();
-        setupUI();
-    }
-    
-    private void checkGameCatalog() {
         boolean[] catalog = controller.getCatalog();
-        if (catalog != null) {
-            hasAllModes = catalog[0];
-            hasIncomplete = catalog[1];
-            System.out.println("=== Game Catalog Status ===");
-            System.out.println("All modes exist (Easy/Medium/Hard): " + hasAllModes);
-            System.out.println("Has incomplete game: " + hasIncomplete);
-        } else {
-            hasAllModes = false;
-            hasIncomplete = false;
-            System.out.println("=== Game Catalog Status ===");
-            System.out.println("Catalog is NULL - no games available");
-        }
+        System.out.println("=== Game Catalog Status ===");
+        System.out.println("All modes exist (Easy/Medium/Hard): " + catalog[0]);
+        System.out.println("Has incomplete game: " + catalog[1]);
+        
+        setupUI(catalog);
     }
     
-    private void setupUI() {
+    private void setupUI(boolean[] catalog) {
         setTitle("Sudoku Game");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(650, 750);
+        setSize(600, 700);
         setLocationRelativeTo(null);
         setResizable(false);
         
-        // Main panel with dark background
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBackground(new Color(45, 52, 54));
+        mainPanel = new JPanel(new BorderLayout(20, 20));
+        mainPanel.setBackground(BG_COLOR);
         mainPanel.setBorder(new EmptyBorder(40, 60, 40, 60));
         
-        // Title
-        titleLabel = new JLabel("SUDOKU GAME");
-        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 48));
-        titleLabel.setForeground(new Color(0, 184, 148));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(titleLabel);
-        mainPanel.add(Box.createVerticalStrut(80));
+        titleLabel = new JLabel("SUDOKU GAME", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 48));
+        titleLabel.setForeground(TITLE_COLOR);
         
-        // Button panel
-        buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        buttonPanel.setBackground(new Color(45, 52, 54));
-        buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        // Check if incomplete game exists
-        if (hasIncomplete) {
-            JButton continueBtn = createMenuButton("CONTINUE LAST GAME", new Color(116, 185, 255));
-            continueBtn.addActionListener(e -> loadIncompleteGame());
-            buttonPanel.add(continueBtn);
-            buttonPanel.add(Box.createVerticalStrut(15));
-        }
-        
-        // Always show difficulty buttons if modes exist
-        if (hasAllModes) {
-            easyBtn = createMenuButton("EASY - 10 empty cells", new Color(129, 236, 236));
-            easyBtn.addActionListener(e -> startGame('e'));
-            buttonPanel.add(easyBtn);
-            buttonPanel.add(Box.createVerticalStrut(15));
-            
-            mediumBtn = createMenuButton("MEDIUM - 20 empty cells", new Color(253, 203, 110));
-            mediumBtn.addActionListener(e -> startGame('m'));
-            buttonPanel.add(mediumBtn);
-            buttonPanel.add(Box.createVerticalStrut(15));
-            
-            hardBtn = createMenuButton("HARD - 25 empty cells", new Color(255, 118, 117));
-            hardBtn.addActionListener(e -> startGame('h'));
-            buttonPanel.add(hardBtn);
-            buttonPanel.add(Box.createVerticalStrut(15));
-        }
-        
-        // Always show load solved sudoku button
-        loadSolvedBtn = createMenuButton("LOAD SOLVED SUDOKU", new Color(162, 155, 254));
-        loadSolvedBtn.addActionListener(e -> loadSolvedSudoku());
-        buttonPanel.add(loadSolvedBtn);
-        buttonPanel.add(Box.createVerticalStrut(15));
-        
-        // Exit button
-        exitBtn = createMenuButton("EXIT GAME", new Color(223, 230, 233));
-        exitBtn.setForeground(new Color(45, 52, 54));
-        exitBtn.addActionListener(e -> System.exit(0));
-        buttonPanel.add(exitBtn);
-        
-        mainPanel.add(buttonPanel);
+        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        mainPanel.add(createButtonPanel(catalog), BorderLayout.CENTER);
         
         add(mainPanel);
         setVisible(true);
     }
     
-    private JButton createMenuButton(String text, Color bgColor) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.BOLD, 18));
-        btn.setForeground(Color.WHITE);
-        btn.setBackground(bgColor);
-        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btn.setMaximumSize(new Dimension(450, 60));
-        btn.setPreferredSize(new Dimension(450, 60));
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    private JPanel createButtonPanel(boolean[] catalog) {
+        boolean allModesExist = catalog[0];
+        boolean hasIncompleteGame = catalog[1];
         
-        // Hover effect
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn.setBackground(bgColor.brighter());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setBackground(bgColor);
-            }
-        });
+        buttonPanel = new JPanel(new GridLayout(hasIncompleteGame ? 6 : 5, 1, 15, 15));
+        buttonPanel.setBackground(BG_COLOR);
         
-        return btn;
+        if (hasIncompleteGame) {
+            continueBtn = createStyledButton("CONTINUE CURRENT GAME", CONTINUE_BTN);
+            continueBtn.addActionListener(e -> loadCurrentGame());
+            buttonPanel.add(continueBtn);
+        }
+        
+        if (allModesExist) {
+            easyBtn = createStyledButton("EASY - 10 empty cells", EASY_BTN);
+            easyBtn.addActionListener(e -> startGame('e'));
+            buttonPanel.add(easyBtn);
+            
+            mediumBtn = createStyledButton("MEDIUM - 20 empty cells", MEDIUM_BTN);
+            mediumBtn.addActionListener(e -> startGame('m'));
+            buttonPanel.add(mediumBtn);
+            
+            hardBtn = createStyledButton("HARD - 25 empty cells", HARD_BTN);
+            hardBtn.addActionListener(e -> startGame('h'));
+            buttonPanel.add(hardBtn);
+        }
+        
+        loadSolvedBtn = createStyledButton("LOAD SOLVED SUDOKU", LOAD_BTN);
+        loadSolvedBtn.addActionListener(e -> loadSolvedSudoku());
+        buttonPanel.add(loadSolvedBtn);
+        
+        exitBtn = createStyledButton("EXIT GAME", EXIT_BTN);
+        exitBtn.addActionListener(e -> System.exit(0));
+        buttonPanel.add(exitBtn);
+        
+        return buttonPanel;
     }
     
-    private void startGame(char difficulty) {
+    private JButton createStyledButton(String text, Color bgColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 18));
+        button.setBackground(bgColor);
+        button.setForeground(bgColor == EASY_BTN || bgColor == MEDIUM_BTN ? Color.BLACK : Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(new Dimension(400, 70));
+        return button;
+    }
+    
+    private void loadCurrentGame() {
         try {
-            int[][] game = controller.getGame(difficulty);
-            if (game != null) {
-                this.dispose();
-                new SudokuGUI(controller, game, difficulty);
-            } else {
-                String diffName = (difficulty == 'e') ? "EASY" : (difficulty == 'm') ? "MEDIUM" : "HARD";
+            String basePath = System.getProperty("user.dir") + "/";
+            String filePath = basePath + "current game/game.csv";
+            
+            File file = new File(filePath);
+            if (!file.exists()) {
                 JOptionPane.showMessageDialog(this, 
-                    "Game not found for " + diffName + " level!\n\n" +
-                    "The game files may not have been saved correctly.\n" +
-                    "Check the console for error messages.",
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                    "No saved game found!", 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
             }
-        } catch (NotFoundException ex) {
-            String diffName = (difficulty == 'e') ? "EASY" : (difficulty == 'm') ? "MEDIUM" : "HARD";
-            JOptionPane.showMessageDialog(this, 
-                "Game not found for " + diffName + " level!\n\n" +
-                "Error: " + ex.getMessage() + "\n\n" +
-                "Make sure:\n" +
-                "1. The folders 'easy', 'medium', 'hard' exist\n" +
-                "2. The CSV files were saved correctly\n" +
-                "3. Check the paths in GameModeFactory.java",
-                "Error", JOptionPane.ERROR_MESSAGE);
-            System.err.println("NotFoundException: " + ex.getMessage());
-            ex.printStackTrace();
+            
+            GameStorage storage = new GameStorage();
+            int[][] currentGame = storage.importBoardFromFile(filePath).getBoard();
+            
+            char difficulty = determineDifficulty(currentGame);
+            
+            dispose();
+            new SudokuGUI(controller, currentGame, difficulty);
+            
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, 
-                "Unexpected error: " + ex.getMessage(),
-                "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                "Error loading game: " + ex.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
     
-    private void loadIncompleteGame() {
-        try {
-            int[][] game = controller.getGame('i'); // 'i' for incomplete
-            if (game != null) {
-                this.dispose();
-                new SudokuGUI(controller, game, 'i');
+    private char determineDifficulty(int[][] board) {
+        int emptyCells = 0;
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                if (board[row][col] == 0) emptyCells++;
             }
+        }
+        
+        if (emptyCells <= 12) return 'e';
+        else if (emptyCells <= 23) return 'm';
+        else return 'h';
+    }
+    
+    private void startGame(char level) {
+        try {
+            int[][] game = controller.getGame(level);
+            dispose();
+            new SudokuGUI(controller, game, level);
         } catch (NotFoundException ex) {
             JOptionPane.showMessageDialog(this, 
-                "Incomplete game not found!",
-                "Error", JOptionPane.ERROR_MESSAGE);
+                "Game not found: " + ex.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
     
     private void loadSolvedSudoku() {
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
         fileChooser.setDialogTitle("Select Solved Sudoku CSV File");
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSV files", "csv"));
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSV Files", "csv"));
         
         int result = fileChooser.showOpenDialog(this);
+        
         if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+            
             try {
-                controller.driveGames(selectedFile.getAbsolutePath());
+                controller.driveGames(filePath);
                 
-                // Show success message with options
-                String[] options = {"EASY", "MEDIUM", "HARD"};
-                int choice = JOptionPane.showOptionDialog(this,
-                    "✓ Games generated successfully!\n\n" +
-                    "Select a difficulty level to start playing:",
-                    "Success - Choose Difficulty",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE,
-                    null,
-                    options,
-                    options[0]);
+                JOptionPane.showMessageDialog(this, 
+                    "Games generated successfully!\nEasy, Medium, and Hard games are now available.", 
+                    "Success", 
+                    JOptionPane.INFORMATION_MESSAGE);
                 
-                // Start game based on choice
-                if (choice >= 0 && choice <= 2) {
-                    char difficulty = (choice == 0) ? 'e' : (choice == 1) ? 'm' : 'h';
-                    this.dispose();
-                    startGame(difficulty);
-                }
+                dispose();
+                new MenuGUI();
                 
             } catch (SolutionInvalidException ex) {
                 JOptionPane.showMessageDialog(this, 
-                    "Invalid solution: " + ex.getMessage() + "\n\n" +
-                    "Please make sure the CSV file contains a valid, complete Sudoku solution.",
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                    "Invalid solution: " + ex.getMessage(), 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, 
+                    "Error: " + ex.getMessage(), 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
             }
         }
     }
     
     public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
         SwingUtilities.invokeLater(() -> new MenuGUI());
     }
 }
