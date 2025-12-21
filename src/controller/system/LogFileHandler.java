@@ -9,19 +9,35 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class LogFileHandler {
-    private final String filename = System.getProperty("user.dir") + "/current game/incomplete.log";
+    private final String filename;
+    
+    public LogFileHandler() {
+        String basePath = System.getProperty("user.dir") + "/";
+        String folderPath = basePath + "current game";
+        
+        File folder = new File(folderPath);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+        
+        this.filename = folderPath + "/incomplete.log";
+    }
     
     public String readAndRemoveLastMove() {
         ArrayList<String> lines = new ArrayList<>();
+        File file = new File(filename);
         
-        // Use try-with-resources to automatically close the reader
+        if (!file.exists()) {
+            return null;
+        }
+        
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = br.readLine()) != null) {
                 lines.add(line);
             }
         } catch (IOException e) {
-            System.out.println("File not found.");
+            System.out.println("Error reading log file: " + e.getMessage());
             return null;
         }
 
@@ -32,16 +48,15 @@ public class LogFileHandler {
         String lastLine = lines.get(lines.size() - 1);
         lines.remove(lines.size() - 1);
         
-        // Use try-with-resources to automatically close the writer
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
             for (String l : lines) {
                 bw.write(l);
                 bw.newLine();
             }
         } catch (IOException e) {
-            System.out.println("Could not write to file.");
+            System.out.println("Error writing log file: " + e.getMessage());
         }
-         
+        
         return lastLine;
     }
     
@@ -50,7 +65,7 @@ public class LogFileHandler {
             writer.write(userAction);
             writer.newLine();
         } catch (IOException e) {
-            System.out.println("Error in writing file");
+            System.out.println("Error writing to log file: " + e.getMessage());
         }
     }
     

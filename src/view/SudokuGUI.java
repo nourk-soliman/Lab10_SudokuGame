@@ -4,6 +4,7 @@ import view.adapter.Controllable;
 import view.model.UserAction;
 import controller.exceptions.InvalidGame;
 import java.awt.*;
+import java.io.File;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.io.IOException;
@@ -26,7 +27,6 @@ public class SudokuGUI extends JFrame {
     private final Color BUTTON_VERIFY = new Color(0, 184, 148);
     private final Color BUTTON_SOLVE = new Color(85, 170, 255);
     private final Color BUTTON_UNDO = new Color(253, 203, 110);
-    private final Color BUTTON_HINT = new Color(162, 155, 254);
     private final Color BUTTON_NEW = new Color(255, 118, 117);
 
     public SudokuGUI(Controllable controller, int[][] game, char difficulty) {
@@ -50,43 +50,38 @@ public class SudokuGUI extends JFrame {
         mainPanel.setBackground(new Color(240, 240, 245));
         mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
         
-        JPanel topPanel = createTopPanel();
-        mainPanel.add(topPanel, BorderLayout.NORTH);
-        
-        JPanel gridPanel = createGridPanel();
-        mainPanel.add(gridPanel, BorderLayout.CENTER);
-        
-        JPanel buttonPanel = createButtonPanel();
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        mainPanel.add(createHeaderPanel(), BorderLayout.NORTH);
+        mainPanel.add(createGridPanel(), BorderLayout.CENTER);
+        mainPanel.add(createButtonPanel(), BorderLayout.SOUTH);
         
         add(mainPanel);
         setVisible(true);
     }
     
-    private JPanel createTopPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(240, 240, 245));
+    private String getDifficultyName() {
+        return difficulty == 'e' || difficulty == 'E' ? "EASY" :
+               difficulty == 'm' || difficulty == 'M' ? "MEDIUM" : "HARD";
+    }
+    
+    private JPanel createHeaderPanel() {
+        JPanel header = new JPanel(new GridLayout(3, 1, 5, 5));
+        header.setBackground(new Color(240, 240, 245));
         
-        JLabel titleLabel = new JLabel("Sudoku Game - " + getDifficultyName(), SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
-        titleLabel.setForeground(new Color(45, 52, 54));
+        JLabel title = new JLabel("Sudoku Game - " + getDifficultyName(), SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 32));
+        title.setForeground(new Color(45, 52, 54));
         
-        JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 5));
-        infoPanel.setBackground(new Color(240, 240, 245));
+        difficultyLabel = new JLabel("Difficulty: " + getDifficultyName(), SwingConstants.CENTER);
+        difficultyLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         
-        difficultyLabel = new JLabel("Difficulty: " + getDifficultyName());
-        difficultyLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        emptyCellsLabel = new JLabel("Empty cells: " + emptyCells, SwingConstants.CENTER);
+        emptyCellsLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         
-        emptyCellsLabel = new JLabel("Empty cells: " + emptyCells);
-        emptyCellsLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        header.add(title);
+        header.add(difficultyLabel);
+        header.add(emptyCellsLabel);
         
-        infoPanel.add(difficultyLabel);
-        infoPanel.add(emptyCellsLabel);
-        
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(infoPanel, BorderLayout.CENTER);
-        
-        return panel;
+        return header;
     }
     
     private JPanel createGridPanel() {
@@ -117,20 +112,14 @@ public class SudokuGUI extends JFrame {
         int right = (col == 8) ? 2 : 1;
         cell.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, GRID_COLOR));
         
-        boolean isFixed = originalBoard[row][col] != 0;
-        
-        if (isFixed) {
-            cell.setText(String.valueOf(originalBoard[row][col]));
+        if (gameBoard[row][col] != 0) {
+            cell.setText(String.valueOf(gameBoard[row][col]));
             cell.setEditable(false);
             cell.setBackground(FIXED_CELL_BG);
             cell.setForeground(Color.BLACK);
         } else {
-            if (gameBoard[row][col] != 0) {
-                cell.setText(String.valueOf(gameBoard[row][col]));
-            }
-            cell.setEditable(true);
             cell.setBackground(EDITABLE_CELL_BG);
-            cell.setForeground(new Color(0, 102, 204));
+            cell.setForeground(new Color(0, 119, 182));
         }
         
         final int finalRow = row;
@@ -164,9 +153,12 @@ public class SudokuGUI extends JFrame {
                         try {
                             UserAction action = new UserAction(finalRow, finalCol, newValue, previousValue);
                             controller.logUserAction(action);
+                            saveCurrentGameState();
                         } catch (IOException ex) {
                             System.err.println("Failed to log action: " + ex.getMessage());
                         }
+                        
+                        solveBtn.setEnabled(emptyCells == 5);
                         
                         if (emptyCells == 0) {
                             verifyGame();
@@ -217,25 +209,15 @@ public class SudokuGUI extends JFrame {
     }
     
     private JButton createStyledButton(String text, Color bgColor) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.BOLD, 14));
-        btn.setBackground(bgColor);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setPreferredSize(new Dimension(180, 50));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn.setBackground(bgColor.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setBackground(bgColor);
-            }
-        });
-        
-        return btn;
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 16));
+        button.setBackground(bgColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(new Dimension(150, 50));
+        return button;
     }
     
     private void verifyGame() {
@@ -285,18 +267,26 @@ public class SudokuGUI extends JFrame {
             return;
         }
         
+        System.out.println("Attempting to solve...");
+        System.out.println("Empty cells: " + emptyCells);
+        
         try {
             int[][] solutions = controller.solveGame(gameBoard);
             
-            if (solutions == null) {
+            System.out.println("Solutions returned: " + (solutions != null ? solutions.length : "null"));
+            
+            if (solutions == null || solutions.length == 0) {
                 JOptionPane.showMessageDialog(this, "No solution found!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
-            for (int[] solution : solutions) {
-                int row = solution[0];
-                int col = solution[1];
-                int value = solution[2];
+            for (int i = 0; i < solutions.length; i++) {
+                int row = solutions[i][0];
+                int col = solutions[i][1];
+                int value = solutions[i][2];
+                
+                System.out.println("Filling cell [" + row + "," + col + "] = " + value);
+                
                 gameBoard[row][col] = value;
                 cells[row][col].setText(String.valueOf(value));
                 cells[row][col].setBackground(new Color(200, 255, 200));
@@ -309,7 +299,13 @@ public class SudokuGUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Puzzle solved!", "Success", JOptionPane.INFORMATION_MESSAGE);
             
         } catch (InvalidGame ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            System.err.println("Solve error: " + ex.getMessage());
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            System.err.println("Unexpected error: " + ex.getMessage());
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Unexpected error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -324,7 +320,7 @@ public class SudokuGUI extends JFrame {
             
             for (int row = 0; row < 9; row++) {
                 for (int col = 0; col < 9; col++) {
-                    if (originalBoard[row][col] == 0) {
+                    if (originalBoard[row][col] == 0 && gameBoard[row][col] != updatedBoard[row][col]) {
                         gameBoard[row][col] = updatedBoard[row][col];
                         cells[row][col].setText(updatedBoard[row][col] == 0 ? "" : String.valueOf(updatedBoard[row][col]));
                         cells[row][col].setBackground(EDITABLE_CELL_BG);
@@ -337,18 +333,7 @@ public class SudokuGUI extends JFrame {
             solveBtn.setEnabled(emptyCells == 5);
             
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Error undoing move!", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    
-    private String getDifficultyName() {
-        switch (difficulty) {
-            case 'e': case 'E': return "EASY";
-            case 'm': case 'M': return "MEDIUM";
-            case 'h': case 'H': return "HARD";
-            case 'i': case 'I': return "INCOMPLETE";
-            default: return "UNKNOWN";
+            JOptionPane.showMessageDialog(this, "Error undoing move: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -370,5 +355,30 @@ public class SudokuGUI extends JFrame {
             System.arraycopy(board[i], 0, copy[i], 0, 9);
         }
         return copy;
+    }
+    
+    private void saveCurrentGameState() {
+        try {
+            String basePath = System.getProperty("user.dir") + "/";
+            String folderPath = basePath + "current game";
+            
+            File folder = new File(folderPath);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+            
+            String filePath = folderPath + "/game.csv";
+            java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.FileWriter(filePath));
+            for (int row = 0; row < 9; row++) {
+                for (int col = 0; col < 9; col++) {
+                    writer.write(String.valueOf(gameBoard[row][col]));
+                    if (col < 8) writer.write(",");
+                }
+                writer.newLine();
+            }
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("Failed to save current game: " + e.getMessage());
+        }
     }
 }

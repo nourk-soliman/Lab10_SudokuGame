@@ -1,6 +1,5 @@
 package controller.logic;
 
-
 public class CellFlyweightFactory {
 
     private static final CellFlyweight[] cache = new CellFlyweight[5];
@@ -12,5 +11,9 @@ public class CellFlyweightFactory {
         }
         cache[index] = new CellFlyweight(row, col);
         return cache[index++];
+    }
+    
+    public static void reset() {
+        index = 0;
     }
 }
