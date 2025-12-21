@@ -5,14 +5,12 @@ import controller.exceptions.NotFoundException;
 import controller.exceptions.SolutionInvalidException;
 import controller.logic.CellFlyweight;
 import controller.logic.Solver;
-import controller.logic.SudokuValidator;
-import java.io.File;
-import controller.system.GameCatalog;
-import java.io.IOException;
 import controller.model.DifficultyEnum;
 import controller.model.Game;
+import controller.system.GameCatalog;
 import controller.system.GameStorage;
 import controller.system.LogFileHandler;
+import java.io.IOException;
 
 public class GameController implements Viewable {
 
@@ -53,8 +51,8 @@ public class GameController implements Viewable {
         }
 
         int[][] board = game.getBoard();
-        SudokuValidator validator = new SudokuValidator();
         
+        // Check if board has any zeros (incomplete)
         boolean hasZeros = false;
         for (int i = 0; i < 9 && !hasZeros; i++) {
             for (int j = 0; j < 9; j++) {
@@ -65,76 +63,86 @@ public class GameController implements Viewable {
             }
         }
 
+        // Find all invalid cells
         StringBuilder invalidCells = new StringBuilder();
-        boolean hasInvalid = false;
 
+        // Check rows for duplicates
         for (int row = 0; row < 9; row++) {
-            if (hasDuplicates(board[row], row, -1)) {
-                hasInvalid = true;
-            }
-        }
-
-        for (int col = 0; col < 9; col++) {
-            int[] column = new int[9];
-            for (int row = 0; row < 9; row++) {
-                column[row] = board[row][col];
-            }
-            if (hasDuplicates(column, -1, col)) {
-                hasInvalid = true;
-            }
-        }
-
-        for (int boxRow = 0; boxRow < 3; boxRow++) {
-            for (int boxCol = 0; boxCol < 3; boxCol++) {
-                int[] box = new int[9];
-                int index = 0;
-                for (int r = boxRow * 3; r < boxRow * 3 + 3; r++) {
-                    for (int c = boxCol * 3; c < boxCol * 3 + 3; c++) {
-                        box[index++] = board[r][c];
-                    }
-                }
-                if (hasDuplicatesInBox(box, boxRow, boxCol, board)) {
-                    hasInvalid = true;
-                }
-            }
-        }
-
-        boolean[] seen = new boolean[10];
-        for (int row = 0; row < 9; row++) {
-            java.util.Arrays.fill(seen, false);
+            boolean[] seen = new boolean[10];
             for (int col = 0; col < 9; col++) {
                 int val = board[row][col];
                 if (val != 0) {
                     if (seen[val]) {
+                        // Found duplicate - mark this cell and find the first occurrence
                         invalidCells.append(" ").append(row).append(",").append(col);
+                        // Also mark the first occurrence
+                        for (int c = 0; c < col; c++) {
+                            if (board[row][c] == val) {
+                                invalidCells.append(" ").append(row).append(",").append(c);
+                                break;
+                            }
+                        }
                     }
                     seen[val] = true;
                 }
             }
         }
 
+        // Check columns for duplicates
         for (int col = 0; col < 9; col++) {
-            java.util.Arrays.fill(seen, false);
+            boolean[] seen = new boolean[10];
             for (int row = 0; row < 9; row++) {
                 int val = board[row][col];
                 if (val != 0) {
                     if (seen[val]) {
-                        invalidCells.append(" ").append(row).append(",").append(col);
+                        // Found duplicate - mark this cell
+                        String cellStr = " " + row + "," + col;
+                        if (!invalidCells.toString().contains(cellStr)) {
+                            invalidCells.append(cellStr);
+                        }
+                        // Also mark the first occurrence
+                        for (int r = 0; r < row; r++) {
+                            if (board[r][col] == val) {
+                                String firstCell = " " + r + "," + col;
+                                if (!invalidCells.toString().contains(firstCell)) {
+                                    invalidCells.append(firstCell);
+                                }
+                                break;
+                            }
+                        }
                     }
                     seen[val] = true;
                 }
             }
         }
 
+        // Check 3x3 boxes for duplicates
         for (int boxRow = 0; boxRow < 3; boxRow++) {
             for (int boxCol = 0; boxCol < 3; boxCol++) {
-                java.util.Arrays.fill(seen, false);
+                boolean[] seen = new boolean[10];
                 for (int r = boxRow * 3; r < boxRow * 3 + 3; r++) {
                     for (int c = boxCol * 3; c < boxCol * 3 + 3; c++) {
                         int val = board[r][c];
                         if (val != 0) {
                             if (seen[val]) {
-                                invalidCells.append(" ").append(r).append(",").append(c);
+                                // Found duplicate - mark this cell
+                                String cellStr = " " + r + "," + c;
+                                if (!invalidCells.toString().contains(cellStr)) {
+                                    invalidCells.append(cellStr);
+                                }
+                                // Find and mark the first occurrence in this box
+                                boolean found = false;
+                                for (int r2 = boxRow * 3; r2 < boxRow * 3 + 3 && !found; r2++) {
+                                    for (int c2 = boxCol * 3; c2 < boxCol * 3 + 3 && !found; c2++) {
+                                        if ((r2 < r || (r2 == r && c2 < c)) && board[r2][c2] == val) {
+                                            String firstCell = " " + r2 + "," + c2;
+                                            if (!invalidCells.toString().contains(firstCell)) {
+                                                invalidCells.append(firstCell);
+                                            }
+                                            found = true;
+                                        }
+                                    }
+                                }
                             }
                             seen[val] = true;
                         }
@@ -143,6 +151,7 @@ public class GameController implements Viewable {
             }
         }
 
+        // Return result
         if (invalidCells.length() > 0) {
             return "Invalid" + invalidCells.toString();
         }
@@ -152,32 +161,6 @@ public class GameController implements Viewable {
         }
 
         return "Valid";
-    }
-
-    private boolean hasDuplicates(int[] array, int row, int col) {
-        boolean[] seen = new boolean[10];
-        for (int val : array) {
-            if (val != 0) {
-                if (seen[val]) {
-                    return true;
-                }
-                seen[val] = true;
-            }
-        }
-        return false;
-    }
-
-    private boolean hasDuplicatesInBox(int[] box, int boxRow, int boxCol, int[][] board) {
-        boolean[] seen = new boolean[10];
-        for (int val : box) {
-            if (val != 0) {
-                if (seen[val]) {
-                    return true;
-                }
-                seen[val] = true;
-            }
-        }
-        return false;
     }
 
     @Override
