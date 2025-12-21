@@ -76,7 +76,8 @@ public  class GameController implements Viewable {
     }
 //-------------------------------------------look  ------------------------------------------------
     @Override
-    public String verifyGame(Game game) {
+    public String verifyGame(Game game) {//add the invalid state and return it as a string with the duplicates:
+        //ex: invalid 1,2,3
    try {
             driver.verifySolution(game.getBoard());
             // check if there are zeros -> incomplete
@@ -150,5 +151,6 @@ public  class GameController implements Viewable {
         //testing the catalog method
      
 }
+
 
 
