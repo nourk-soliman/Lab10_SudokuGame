@@ -46,16 +46,27 @@ public class MenuGUI extends JFrame {
     private void setupUI(boolean[] catalog) {
         setTitle("Sudoku Game");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(600, 700);
+        
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int screenWidth = screenSize.width;
+        int screenHeight = screenSize.height;
+        
+        int windowWidth = Math.min(600, (int)(screenWidth * 0.5));
+        int windowHeight = Math.min(700, (int)(screenHeight * 0.8));
+        
+        setSize(windowWidth, windowHeight);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
+        setMinimumSize(new Dimension(400, 500));
         
         mainPanel = new JPanel(new BorderLayout(20, 20));
         mainPanel.setBackground(BG_COLOR);
-        mainPanel.setBorder(new EmptyBorder(40, 60, 40, 60));
+        
+        int padding = Math.max(20, windowWidth / 15);
+        mainPanel.setBorder(new EmptyBorder(padding, padding, padding, padding));
         
         titleLabel = new JLabel("SUDOKU GAME", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 48));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, Math.min(48, windowWidth / 12)));
         titleLabel.setForeground(TITLE_COLOR);
         
         mainPanel.add(titleLabel, BorderLayout.NORTH);
@@ -111,7 +122,6 @@ public class MenuGUI extends JFrame {
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(400, 70));
         return button;
     }
     

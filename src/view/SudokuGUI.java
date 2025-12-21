@@ -42,9 +42,18 @@ public class SudokuGUI extends JFrame {
     private void setupUI() {
         setTitle("Sudoku Game - " + getDifficultyName());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setSize(650, 750);
+        
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int screenWidth = screenSize.width;
+        int screenHeight = screenSize.height;
+        
+        int windowWidth = Math.min(650, (int)(screenWidth * 0.6));
+        int windowHeight = Math.min(750, (int)(screenHeight * 0.85));
+        
+        setSize(windowWidth, windowHeight);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
+        setMinimumSize(new Dimension(500, 600));
         
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -182,7 +191,9 @@ public class SudokuGUI extends JFrame {
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
         panel.setBackground(new Color(240, 240, 245));
-        panel.setBorder(new EmptyBorder(10, 80, 0, 80));
+        
+        int horizontalPadding = Math.max(20, (getWidth() - 500) / 4);
+        panel.setBorder(new EmptyBorder(10, horizontalPadding, 10, horizontalPadding));
         
         verifyBtn = createStyledButton("✓ VERIFY", BUTTON_VERIFY);
         verifyBtn.addActionListener(e -> verifyGame());
@@ -224,7 +235,6 @@ public class SudokuGUI extends JFrame {
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(150, 50));
         return button;
     }
     
