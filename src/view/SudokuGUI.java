@@ -113,10 +113,11 @@ public class SudokuGUI extends JFrame {
         cell.setHorizontalAlignment(JTextField.CENTER);
         cell.setFont(new Font("Arial", Font.BOLD, 20));
         
-        int top = (row % 3 == 0) ? 2 : 1;
-        int left = (col % 3 == 0) ? 2 : 1;
-        int bottom = (row == 8) ? 2 : 1;
-        int right = (col == 8) ? 2 : 1;
+        int top = (row % 3 == 0) ? 3 : 1;
+        int left = (col % 3 == 0) ? 3 : 1;
+        int bottom = (row == 8) ? 3 : ((row % 3 == 2) ? 3 : 1);
+        int right = (col == 8) ? 3 : ((col % 3 == 2) ? 3 : 1);
+        
         cell.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, GRID_COLOR));
         
         if (gameBoard[row][col] != 0) {
