@@ -3,9 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
 package view.adapter;
-import controller.exceptions.SolutionInvalidException;
 import controller.exceptions.InvalidGame;
 import controller.exceptions.NotFoundException;
+import controller.exceptions.SolutionInvalidException;
 import java.io.IOException;
 import view.model.UserAction;
 
@@ -25,5 +25,6 @@ public interface Controllable {
   // Logs the user action
   void logUserAction(UserAction userAction) throws IOException;
  int[][] undoLastMove(int[][]board) throws IOException;
+ // Gets the original board for a saved game
+ int[][] getOriginalBoard();
 }
-

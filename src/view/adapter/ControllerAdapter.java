@@ -144,4 +144,11 @@ public class ControllerAdapter implements Controllable {
         Game result = controller.undoLastMove(game);
         return result != null ? result.getBoard() : null;
     }
+    
+    @Override
+    public int[][] getOriginalBoard() {
+        GameStorage storage = new GameStorage();
+        Game originalGame = storage.readOriginalGame();
+        return originalGame != null ? originalGame.getBoard() : null;
+    }
 }

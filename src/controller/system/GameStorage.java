@@ -2,8 +2,8 @@ package controller.system;
 
 import controller.GameController;
 import controller.csv.CSVGameHandler;
-import controller.model.Game;
 import controller.model.DifficultyEnum;
+import controller.model.Game;
 import java.io.File;
 
 public class GameStorage {
@@ -21,6 +21,16 @@ public class GameStorage {
         
         if (catalog != null && catalog.isCurrent()) {
             return importBoardFromFile(basePath + "current game/game.csv");
+        }
+        return null;
+    }
+    
+    public Game readOriginalGame() {
+        String filePath = basePath + "current game/original.csv";
+        
+        File file = new File(filePath);
+        if (file.exists()) {
+            return importBoardFromFile(filePath);
         }
         return null;
     }
@@ -84,6 +94,22 @@ public class GameStorage {
         
         CSVGameHandler.writeCSV(filePath, game.getBoard());
     }
+    
+    public void saveCurrentGameWithOriginal(Game currentGame, Game originalGame) {
+        String folderPath = basePath + "current game";
+        String currentFilePath = folderPath + "/game.csv";
+        String originalFilePath = folderPath + "/original.csv";
+        
+        // Create the folder if it doesn't exist
+        File folder = new File(folderPath);
+        if (!folder.exists()) {
+            boolean created = folder.mkdirs();
+            System.out.println("Creating current game folder: " + folderPath + " - " + (created ? "SUCCESS" : "FAILED"));
+        }
+        
+        CSVGameHandler.writeCSV(currentFilePath, currentGame.getBoard());
+        CSVGameHandler.writeCSV(originalFilePath, originalGame.getBoard());
+    }
 
     public void deleteGameFromFolder(String difficulty) {
         CSVGameHandler.deleteCSV(basePath + difficulty + "/" + difficulty + ".csv");
@@ -91,6 +117,7 @@ public class GameStorage {
 
     public void deleteCurrentGame() {
         CSVGameHandler.deleteCSV(basePath + "current game/game.csv");
+        CSVGameHandler.deleteCSV(basePath + "current game/original.csv");
     }
 
     public Game importBoardFromFile(String filename) {

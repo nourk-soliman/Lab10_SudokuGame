@@ -1,6 +1,8 @@
 package view;
 
 import controller.exceptions.InvalidGame;
+import controller.model.Game;
+import controller.system.GameStorage;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -33,9 +35,13 @@ public class SudokuGUI extends JFrame {
     private boolean isUpdatingProgrammatically = false;
 
     public SudokuGUI(Controllable controller, int[][] game, char difficulty) {
+        this(controller, game, game, difficulty);
+    }
+    
+    public SudokuGUI(Controllable controller, int[][] game, int[][] original, char difficulty) {
         this.controller = controller;
         this.gameBoard = copyBoard(game);
-        this.originalBoard = copyBoard(game);
+        this.originalBoard = copyBoard(original);
         this.difficulty = difficulty;
         this.emptyCells = countEmptyCells();
         
@@ -132,12 +138,18 @@ public class SudokuGUI extends JFrame {
         
         cell.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, GRID_COLOR));
         
-        if (gameBoard[row][col] != 0) {
+        // Check the ORIGINAL board to determine if cell should be editable
+        if (originalBoard[row][col] != 0) {
+            // This was a fixed cell in the original puzzle
             cell.setText(String.valueOf(gameBoard[row][col]));
             cell.setEditable(false);
             cell.setBackground(FIXED_CELL_BG);
             cell.setForeground(Color.BLACK);
         } else {
+            // This was an empty cell in the original puzzle - remains editable
+            if (gameBoard[row][col] != 0) {
+                cell.setText(String.valueOf(gameBoard[row][col]));
+            }
             cell.setBackground(EDITABLE_CELL_BG);
             cell.setForeground(new Color(0, 119, 182));
         }
@@ -206,17 +218,17 @@ public class SudokuGUI extends JFrame {
         int horizontalPadding = Math.max(20, (getWidth() - 500) / 4);
         panel.setBorder(new EmptyBorder(10, horizontalPadding, 10, horizontalPadding));
         
-        verifyBtn = createStyledButton("✓ VERIFY", BUTTON_VERIFY);
+        verifyBtn = createStyledButton("VERIFY", BUTTON_VERIFY);
         verifyBtn.addActionListener(e -> verifyGame());
         
-        solveBtn = createStyledButton("🧩 SOLVE", BUTTON_SOLVE);
+        solveBtn = createStyledButton("SOLVE", BUTTON_SOLVE);
         solveBtn.addActionListener(e -> solveGame());
         solveBtn.setEnabled(emptyCells == 5);
         
-        undoBtn = createStyledButton("↶ UNDO", BUTTON_UNDO);
+        undoBtn = createStyledButton("UNDO", BUTTON_UNDO);
         undoBtn.addActionListener(e -> undoLastMove());
         
-        newGameBtn = createStyledButton("🔄 NEW GAME", BUTTON_NEW);
+        newGameBtn = createStyledButton("NEW GAME", BUTTON_NEW);
         newGameBtn.addActionListener(e -> {
             int choice = JOptionPane.showConfirmDialog(
                 this,
@@ -504,25 +516,11 @@ public class SudokuGUI extends JFrame {
     
     private void saveCurrentGameState() {
         try {
-            String basePath = System.getProperty("user.dir") + "/";
-            String folderPath = basePath + "current game";
-            
-            File folder = new File(folderPath);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-            
-            String filePath = folderPath + "/game.csv";
-            java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.FileWriter(filePath));
-            for (int row = 0; row < 9; row++) {
-                for (int col = 0; col < 9; col++) {
-                    writer.write(String.valueOf(gameBoard[row][col]));
-                    if (col < 8) writer.write(",");
-                }
-                writer.newLine();
-            }
-            writer.close();
-        } catch (IOException e) {
+            GameStorage storage = new GameStorage();
+            Game currentGame = new Game(gameBoard);
+            Game originalGame = new Game(originalBoard);
+            storage.saveCurrentGameWithOriginal(currentGame, originalGame);
+        } catch (Exception e) {
             System.err.println("Failed to save current game: " + e.getMessage());
         }
     }
@@ -565,6 +563,11 @@ public class SudokuGUI extends JFrame {
             File gameFile = new File(folderPath + "/game.csv");
             if (gameFile.exists()) {
                 gameFile.delete();
+            }
+            
+            File originalFile = new File(folderPath + "/original.csv");
+            if (originalFile.exists()) {
+                originalFile.delete();
             }
             
             File logFile = new File(folderPath + "/incomplete.log");

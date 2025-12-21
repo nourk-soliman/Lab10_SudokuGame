@@ -128,10 +128,13 @@ public class MenuGUI extends JFrame {
     private void loadCurrentGame() {
         try {
             String basePath = System.getProperty("user.dir") + "/";
-            String filePath = basePath + "current game/game.csv";
+            String gameFilePath = basePath + "current game/game.csv";
+            String originalFilePath = basePath + "current game/original.csv";
             
-            File file = new File(filePath);
-            if (!file.exists()) {
+            File gameFile = new File(gameFilePath);
+            File originalFile = new File(originalFilePath);
+            
+            if (!gameFile.exists()) {
                 JOptionPane.showMessageDialog(this, 
                     "No saved game found!", 
                     "Error", 
@@ -140,12 +143,21 @@ public class MenuGUI extends JFrame {
             }
             
             GameStorage storage = new GameStorage();
-            int[][] currentGame = storage.importBoardFromFile(filePath).getBoard();
+            int[][] currentGame = storage.importBoardFromFile(gameFilePath).getBoard();
             
-            char difficulty = determineDifficulty(currentGame);
+            // Load original board if it exists, otherwise use current as original
+            int[][] originalBoard;
+            if (originalFile.exists()) {
+                originalBoard = storage.importBoardFromFile(originalFilePath).getBoard();
+            } else {
+                // Fallback: treat all zeros in current game as editable
+                originalBoard = createOriginalFromCurrent(currentGame);
+            }
+            
+            char difficulty = determineDifficulty(originalBoard);
             
             dispose();
-            new SudokuGUI(controller, currentGame, difficulty);
+            new SudokuGUI(controller, currentGame, originalBoard, difficulty);
             
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -154,6 +166,19 @@ public class MenuGUI extends JFrame {
                 "Error", 
                 JOptionPane.ERROR_MESSAGE);
         }
+    }
+    
+    private int[][] createOriginalFromCurrent(int[][] currentBoard) {
+        // Create an original board where all zeros remain as zeros (editable)
+        // and non-zeros remain as non-zeros (but we can't distinguish user-entered from original)
+        // This is a fallback for games saved before the original.csv feature
+        int[][] original = new int[9][9];
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                original[row][col] = currentBoard[row][col];
+            }
+        }
+        return original;
     }
     
     private char determineDifficulty(int[][] board) {
@@ -173,7 +198,8 @@ public class MenuGUI extends JFrame {
         try {
             int[][] game = controller.getGame(level);
             dispose();
-            new SudokuGUI(controller, game, level);
+            // For new games, the original is the same as the starting game
+            new SudokuGUI(controller, game, game, level);
         } catch (NotFoundException ex) {
             JOptionPane.showMessageDialog(this, 
                 "Game not found: " + ex.getMessage(), 
