@@ -33,32 +33,10 @@ public  class GameController implements Viewable {
    
     
     @Override
-    public GameCatalog getCatalog(){
-        String basePath="N:\\Term 5\\Programming 2\\SudokuGame\\";
-        String[]difficultyPaths={"easy","medium","hard"};
-        
-        boolean current=false;
-        File currentFolder=new File(basePath+"current game");
-        
-        if(currentFolder.isDirectory() && currentFolder.list().length >0) //checks if the folder exists && that there is at least one folder.
-        {
-            current=true;
-        }
-        
-       boolean allModesExist=true;
-       for(int i=0;i<3;i++)
-       {File folder=new File(basePath+difficultyPaths[i]);
-       if(!folder.isDirectory() || !(folder.list().length>0))
-       {allModesExist=false;
-       break;}
-       }
-       GameCatalog catalog=new GameCatalog(current,allModesExist);
-       return catalog;
-       }
-  
+    public GameCatalog getCatalog() {
+        return GameCatalog.checkGames();
+    }
     
-
-
     @Override
     public Game getGame(DifficultyEnum level) throws NotFoundException {
     Game game = storage.readGame(level);
