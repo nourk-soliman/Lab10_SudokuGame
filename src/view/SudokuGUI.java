@@ -41,10 +41,17 @@ public class SudokuGUI extends JFrame {
     
     private void setupUI() {
         setTitle("Sudoku Game - " + getDifficultyName());
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(650, 750);
         setLocationRelativeTo(null);
         setResizable(false);
+        
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                handleWindowClose();
+            }
+        });
         
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBackground(new Color(240, 240, 245));
@@ -379,6 +386,55 @@ public class SudokuGUI extends JFrame {
             writer.close();
         } catch (IOException e) {
             System.err.println("Failed to save current game: " + e.getMessage());
+        }
+    }
+    
+    private void handleWindowClose() {
+        if (emptyCells == 0) {
+            dispose();
+            System.exit(0);
+            return;
+        }
+        
+        int choice = JOptionPane.showConfirmDialog(
+            this,
+            "Do you want to save your current game progress?",
+            "Save Game",
+            JOptionPane.YES_NO_CANCEL_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+        
+        if (choice == JOptionPane.YES_OPTION) {
+            saveCurrentGameState();
+            JOptionPane.showMessageDialog(this, 
+                "Game saved! You can resume later.", 
+                "Saved", 
+                JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+            System.exit(0);
+        } else if (choice == JOptionPane.NO_OPTION) {
+            deleteCurrentGame();
+            dispose();
+            System.exit(0);
+        }
+    }
+    
+    private void deleteCurrentGame() {
+        try {
+            String basePath = System.getProperty("user.dir") + "/";
+            String folderPath = basePath + "current game";
+            
+            File gameFile = new File(folderPath + "/game.csv");
+            if (gameFile.exists()) {
+                gameFile.delete();
+            }
+            
+            File logFile = new File(folderPath + "/incomplete.log");
+            if (logFile.exists()) {
+                logFile.delete();
+            }
+        } catch (Exception e) {
+            System.err.println("Error deleting current game: " + e.getMessage());
         }
     }
 }
