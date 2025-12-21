@@ -14,10 +14,11 @@ public class SudokuGUI extends JFrame {
     private int[][] gameBoard;
     private int[][] originalBoard;
     private JTextField[][] cells;
-    private JButton verifyBtn, solveBtn, undoBtn, hintBtn, newGameBtn;
+    private JButton verifyBtn, solveBtn, undoBtn, hintBtn, newGameBtn, musicBtn;
     private JLabel difficultyLabel, emptyCellsLabel;
     private char difficulty;
     private int emptyCells;
+    private boolean musicOn = true;
     
     // Colors
     private final Color FIXED_CELL_BG = new Color(240, 240, 240);
@@ -43,7 +44,7 @@ public class SudokuGUI extends JFrame {
     private void setupUI() {
         setTitle("Sudoku Game - " + getDifficultyName());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(750, 900);
+        setSize(750, 750);
         setLocationRelativeTo(null);
         setResizable(false);
         
@@ -91,8 +92,19 @@ public class SudokuGUI extends JFrame {
         emptyCellsLabel.setFont(new Font("Arial", Font.BOLD, 16));
         emptyCellsLabel.setForeground(new Color(45, 52, 54));
         
+        // Music button
+        musicBtn = new JButton(musicOn ? "🔊 Music ON" : "🔇 Music OFF");
+        musicBtn.setFont(new Font("Arial", Font.PLAIN, 14));
+        musicBtn.setForeground(Color.WHITE);
+        musicBtn.setBackground(new Color(45, 52, 54));
+        musicBtn.setBorderPainted(false);
+        musicBtn.setFocusPainted(false);
+        musicBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        musicBtn.addActionListener(e -> toggleMusic());
+        
         infoPanel.add(difficultyLabel);
         infoPanel.add(emptyCellsLabel);
+        infoPanel.add(musicBtn);
         
         panel.add(titleLabel, BorderLayout.NORTH);
         panel.add(infoPanel, BorderLayout.SOUTH);
@@ -104,7 +116,7 @@ public class SudokuGUI extends JFrame {
         JPanel gridPanel = new JPanel(new GridLayout(9, 9, 0, 0));
         gridPanel.setBackground(GRID_COLOR);
         gridPanel.setBorder(BorderFactory.createLineBorder(GRID_COLOR, 3));
-        gridPanel.setPreferredSize(new Dimension(630, 630));
+        gridPanel.setPreferredSize(new Dimension(500, 500));
         
         cells = new JTextField[9][9];
         
@@ -127,6 +139,7 @@ public class SudokuGUI extends JFrame {
         JTextField cell = new JTextField();
         cell.setHorizontalAlignment(JTextField.CENTER);
         cell.setFont(new Font("Arial", Font.BOLD, 24));
+        cell.setPreferredSize(new Dimension(55, 55)); // Set cell size
         
         // Set border for 3x3 boxes
         int top = (row % 3 == 0) ? 2 : 1;
@@ -379,6 +392,11 @@ public class SudokuGUI extends JFrame {
             this.dispose();
             new MenuGUI();
         }
+    }
+    
+    private void toggleMusic() {
+        musicOn = !musicOn;
+        musicBtn.setText(musicOn ? "🔊 Music ON" : "🔇 Music OFF");
     }
     
     private void checkBoardCompletion() {
