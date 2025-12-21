@@ -14,13 +14,11 @@ public class SudokuGUI extends JFrame {
     private int[][] gameBoard;
     private int[][] originalBoard;
     private JTextField[][] cells;
-    private JButton verifyBtn, solveBtn, undoBtn, hintBtn, newGameBtn, musicBtn;
+    private JButton verifyBtn, solveBtn, undoBtn, newGameBtn;
     private JLabel difficultyLabel, emptyCellsLabel;
     private char difficulty;
     private int emptyCells;
-    private boolean musicOn = true;
     
-    // Colors
     private final Color FIXED_CELL_BG = new Color(240, 240, 240);
     private final Color EDITABLE_CELL_BG = Color.WHITE;
     private final Color INVALID_CELL_BG = new Color(255, 200, 200);
@@ -44,79 +42,57 @@ public class SudokuGUI extends JFrame {
     private void setupUI() {
         setTitle("Sudoku Game - " + getDifficultyName());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(750, 750);
+        setSize(650, 750);
         setLocationRelativeTo(null);
         setResizable(false);
         
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBackground(new Color(240, 240, 245));
-        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
         
-        // Top panel with title and info
         JPanel topPanel = createTopPanel();
         mainPanel.add(topPanel, BorderLayout.NORTH);
         
-        // Sudoku grid
         JPanel gridPanel = createGridPanel();
         mainPanel.add(gridPanel, BorderLayout.CENTER);
         
-        // Button panel
         JPanel buttonPanel = createButtonPanel();
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         
         add(mainPanel);
-        updateSolveButtonState();
         setVisible(true);
     }
     
     private JPanel createTopPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
+        JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(240, 240, 245));
-        panel.setBorder(new EmptyBorder(0, 0, 15, 0));
         
-        // Title
         JLabel titleLabel = new JLabel("Sudoku Game - " + getDifficultyName(), SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 28));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
         titleLabel.setForeground(new Color(45, 52, 54));
         
-        // Info panel
         JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 5));
         infoPanel.setBackground(new Color(240, 240, 245));
         
         difficultyLabel = new JLabel("Difficulty: " + getDifficultyName());
-        difficultyLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        difficultyLabel.setForeground(new Color(45, 52, 54));
+        difficultyLabel.setFont(new Font("Arial", Font.PLAIN, 16));
         
         emptyCellsLabel = new JLabel("Empty cells: " + emptyCells);
-        emptyCellsLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        emptyCellsLabel.setForeground(new Color(45, 52, 54));
-        
-        // Music button
-        musicBtn = new JButton(musicOn ? "🔊 Music ON" : "🔇 Music OFF");
-        musicBtn.setFont(new Font("Arial", Font.PLAIN, 14));
-        musicBtn.setForeground(Color.WHITE);
-        musicBtn.setBackground(new Color(45, 52, 54));
-        musicBtn.setBorderPainted(false);
-        musicBtn.setFocusPainted(false);
-        musicBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        musicBtn.addActionListener(e -> toggleMusic());
+        emptyCellsLabel.setFont(new Font("Arial", Font.PLAIN, 16));
         
         infoPanel.add(difficultyLabel);
         infoPanel.add(emptyCellsLabel);
-        infoPanel.add(musicBtn);
         
         panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(infoPanel, BorderLayout.SOUTH);
+        panel.add(infoPanel, BorderLayout.CENTER);
         
         return panel;
     }
     
     private JPanel createGridPanel() {
-        JPanel gridPanel = new JPanel(new GridLayout(9, 9, 0, 0));
+        JPanel gridPanel = new JPanel(new GridLayout(9, 9));
         gridPanel.setBackground(GRID_COLOR);
         gridPanel.setBorder(BorderFactory.createLineBorder(GRID_COLOR, 3));
-        gridPanel.setPreferredSize(new Dimension(500, 500));
         
         cells = new JTextField[9][9];
         
@@ -127,21 +103,14 @@ public class SudokuGUI extends JFrame {
             }
         }
         
-        // Center the grid
-        JPanel container = new JPanel(new GridBagLayout());
-        container.setBackground(new Color(240, 240, 245));
-        container.add(gridPanel);
-        
-        return container;
+        return gridPanel;
     }
     
     private JTextField createCell(int row, int col) {
         JTextField cell = new JTextField();
         cell.setHorizontalAlignment(JTextField.CENTER);
-        cell.setFont(new Font("Arial", Font.BOLD, 24));
-        cell.setPreferredSize(new Dimension(55, 55)); // Set cell size
+        cell.setFont(new Font("Arial", Font.BOLD, 20));
         
-        // Set border for 3x3 boxes
         int top = (row % 3 == 0) ? 2 : 1;
         int left = (col % 3 == 0) ? 2 : 1;
         int bottom = (row == 8) ? 2 : 1;
@@ -167,7 +136,6 @@ public class SudokuGUI extends JFrame {
         final int finalRow = row;
         final int finalCol = col;
         
-        // Add document listener for input
         cell.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void changedUpdate(javax.swing.event.DocumentEvent e) { updateCell(); }
             public void removeUpdate(javax.swing.event.DocumentEvent e) { updateCell(); }
@@ -178,46 +146,31 @@ public class SudokuGUI extends JFrame {
                     String text = cell.getText();
                     if (text.length() > 1) {
                         cell.setText(text.substring(text.length() - 1));
+                    }
+                    
+                    if (!text.isEmpty() && !text.matches("[1-9]")) {
+                        cell.setText("");
                         return;
                     }
                     
                     int previousValue = gameBoard[finalRow][finalCol];
+                    int newValue = text.isEmpty() ? 0 : Integer.parseInt(text);
                     
-                    if (text.isEmpty()) {
-                        gameBoard[finalRow][finalCol] = 0;
-                    } else {
+                    if (newValue != previousValue) {
+                        gameBoard[finalRow][finalCol] = newValue;
+                        emptyCells = countEmptyCells();
+                        emptyCellsLabel.setText("Empty cells: " + emptyCells);
+                        
                         try {
-                            int value = Integer.parseInt(text);
-                            if (value >= 1 && value <= 9) {
-                                gameBoard[finalRow][finalCol] = value;
-                            } else {
-                                cell.setText("");
-                                gameBoard[finalRow][finalCol] = 0;
-                            }
-                        } catch (NumberFormatException ex) {
-                            cell.setText("");
-                            gameBoard[finalRow][finalCol] = 0;
-                        }
-                    }
-                    
-                    // Log user action
-                    if (!isFixed && gameBoard[finalRow][finalCol] != previousValue) {
-                        try {
-                            UserAction action = new UserAction(finalRow, finalCol, 
-                                gameBoard[finalRow][finalCol], previousValue);
+                            UserAction action = new UserAction(finalRow, finalCol, newValue, previousValue);
                             controller.logUserAction(action);
                         } catch (IOException ex) {
-                            System.err.println("Error logging action: " + ex.getMessage());
+                            System.err.println("Failed to log action: " + ex.getMessage());
                         }
-                    }
-                    
-                    emptyCells = countEmptyCells();
-                    emptyCellsLabel.setText("Empty cells: " + emptyCells);
-                    updateSolveButtonState();
-                    
-                    // Check if board is complete
-                    if (emptyCells == 0) {
-                        checkBoardCompletion();
+                        
+                        if (emptyCells == 0) {
+                            verifyGame();
+                        }
                     }
                 });
             }
@@ -227,59 +180,55 @@ public class SudokuGUI extends JFrame {
     }
     
     private JPanel createButtonPanel() {
-        JPanel panel = new JPanel(new GridLayout(2, 3, 15, 15));
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
         panel.setBackground(new Color(240, 240, 245));
-        panel.setBorder(new EmptyBorder(20, 50, 10, 50));
+        panel.setBorder(new EmptyBorder(10, 80, 0, 80));
         
-        // Verify button
-        verifyBtn = createGameButton("✓ VERIFY", BUTTON_VERIFY);
-        verifyBtn.addActionListener(e -> verifyBoard());
+        verifyBtn = createStyledButton("✓ VERIFY", BUTTON_VERIFY);
+        verifyBtn.addActionListener(e -> verifyGame());
         
-        // Solve button
-        solveBtn = createGameButton("🧩 SOLVE", BUTTON_SOLVE);
-        solveBtn.addActionListener(e -> solveBoard());
+        solveBtn = createStyledButton("🧩 SOLVE", BUTTON_SOLVE);
+        solveBtn.addActionListener(e -> solveGame());
+        solveBtn.setEnabled(emptyCells == 5);
         
-        // Undo button
-        undoBtn = createGameButton("↶ UNDO", BUTTON_UNDO);
+        undoBtn = createStyledButton("↶ UNDO", BUTTON_UNDO);
         undoBtn.addActionListener(e -> undoLastMove());
         
-        // Hint button
-        hintBtn = createGameButton("💡 HINT", BUTTON_HINT);
-        hintBtn.addActionListener(e -> showHint());
-        
-        // New Game button
-        newGameBtn = createGameButton("🔄 NEW GAME", BUTTON_NEW);
-        newGameBtn.addActionListener(e -> newGame());
-        
-        // Empty space
-        JPanel emptyPanel = new JPanel();
-        emptyPanel.setBackground(new Color(240, 240, 245));
+        newGameBtn = createStyledButton("🔄 NEW GAME", BUTTON_NEW);
+        newGameBtn.addActionListener(e -> {
+            int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Start a new game? Current progress will be lost.",
+                "New Game",
+                JOptionPane.YES_NO_OPTION
+            );
+            if (choice == JOptionPane.YES_OPTION) {
+                dispose();
+                new MenuGUI();
+            }
+        });
         
         panel.add(verifyBtn);
         panel.add(solveBtn);
         panel.add(undoBtn);
-        panel.add(hintBtn);
         panel.add(newGameBtn);
-        panel.add(emptyPanel);
         
         return panel;
     }
     
-    private JButton createGameButton(String text, Color bgColor) {
+    private JButton createStyledButton(String text, Color bgColor) {
         JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.BOLD, 16));
-        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("Arial", Font.BOLD, 14));
         btn.setBackground(bgColor);
-        btn.setBorderPainted(false);
+        btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setBorderPainted(false);
         btn.setPreferredSize(new Dimension(180, 50));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (btn.isEnabled()) {
-                    btn.setBackground(bgColor.brighter());
-                }
+                btn.setBackground(bgColor.darker());
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 btn.setBackground(bgColor);
@@ -289,159 +238,117 @@ public class SudokuGUI extends JFrame {
         return btn;
     }
     
-    private void verifyBoard() {
-        boolean[][] validation = controller.verifyGame(gameBoard);
-        
-        if (validation == null) {
-            JOptionPane.showMessageDialog(this, "Error verifying board!", 
-                "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        
-        boolean hasInvalid = false;
-        
-        for (int row = 0; row < 9; row++) {
-            for (int col = 0; col < 9; col++) {
-                if (!validation[row][col]) {
-                    cells[row][col].setBackground(INVALID_CELL_BG);
-                    hasInvalid = true;
-                } else if (originalBoard[row][col] == 0) {
-                    cells[row][col].setBackground(EDITABLE_CELL_BG);
+    private void verifyGame() {
+        try {
+            boolean[][] validity = controller.verifyGame(gameBoard);
+            
+            if (validity == null) {
+                JOptionPane.showMessageDialog(this, 
+                    "Unable to verify game. Please check your input.", 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            boolean allValid = true;
+            for (int row = 0; row < 9; row++) {
+                for (int col = 0; col < 9; col++) {
+                    if (originalBoard[row][col] == 0) {
+                        if (validity[row][col]) {
+                            cells[row][col].setBackground(EDITABLE_CELL_BG);
+                        } else {
+                            cells[row][col].setBackground(INVALID_CELL_BG);
+                            allValid = false;
+                        }
+                    }
                 }
             }
-        }
-        
-        if (hasInvalid) {
+            
+            if (allValid && emptyCells == 0) {
+                JOptionPane.showMessageDialog(this, "Congratulations! You solved it!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else if (allValid) {
+                JOptionPane.showMessageDialog(this, "So far, so good! Keep going!", "Valid", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Some cells are incorrect (shown in red)", "Invalid", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, 
-                "Board has invalid cells! Check the highlighted cells.",
-                "Invalid Board", JOptionPane.WARNING_MESSAGE);
-        } else if (emptyCells == 0) {
-            JOptionPane.showMessageDialog(this, 
-                "Congratulations! The puzzle is solved correctly!",
-                "Success", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, 
-                "Board is valid so far! Keep going!",
-                "Valid", JOptionPane.INFORMATION_MESSAGE);
+                "Error verifying game: " + ex.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
     
-    private void solveBoard() {
+    private void solveGame() {
+        if (emptyCells != 5) {
+            JOptionPane.showMessageDialog(this, "Solve only works when exactly 5 cells are empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
         try {
-            int[][] solution = controller.solveGame(gameBoard);
+            int[][] solutions = controller.solveGame(gameBoard);
             
-            if (solution != null) {
-                for (int i = 0; i < solution.length; i++) {
-                    int row = solution[i][0];
-                    int col = solution[i][1];
-                    int value = solution[i][2];
-                    
-                    gameBoard[row][col] = value;
-                    cells[row][col].setText(String.valueOf(value));
-                    cells[row][col].setForeground(new Color(0, 153, 0));
-                }
-                
-                emptyCells = countEmptyCells();
-                emptyCellsLabel.setText("Empty cells: " + emptyCells);
-                updateSolveButtonState();
-                
-                JOptionPane.showMessageDialog(this, 
-                    "Puzzle solved successfully!",
-                    "Solved", JOptionPane.INFORMATION_MESSAGE);
+            if (solutions == null) {
+                JOptionPane.showMessageDialog(this, "No solution found!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
+            
+            for (int[] solution : solutions) {
+                int row = solution[0];
+                int col = solution[1];
+                int value = solution[2];
+                gameBoard[row][col] = value;
+                cells[row][col].setText(String.valueOf(value));
+                cells[row][col].setBackground(new Color(200, 255, 200));
+            }
+            
+            emptyCells = 0;
+            emptyCellsLabel.setText("Empty cells: 0");
+            solveBtn.setEnabled(false);
+            
+            JOptionPane.showMessageDialog(this, "Puzzle solved!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            
         } catch (InvalidGame ex) {
-            JOptionPane.showMessageDialog(this, 
-                "Error solving: " + ex.getMessage(),
-                "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
     private void undoLastMove() {
         try {
             int[][] updatedBoard = controller.undoLastMove(gameBoard);
-            if (updatedBoard != null) {
-                gameBoard = copyBoard(updatedBoard);
-                refreshBoard();
-                emptyCells = countEmptyCells();
-                emptyCellsLabel.setText("Empty cells: " + emptyCells);
-                updateSolveButtonState();
-            } else {
-                JOptionPane.showMessageDialog(this, 
-                    "No moves to undo!",
-                    "Info", JOptionPane.INFORMATION_MESSAGE);
-            }
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, 
-                "Error undoing move: " + ex.getMessage(),
-                "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    private void showHint() {
-        JOptionPane.showMessageDialog(this, 
-            "Look for cells with only one possible value!\nCheck rows, columns, and 3x3 boxes.",
-            "Hint", JOptionPane.INFORMATION_MESSAGE);
-    }
-    
-    private void newGame() {
-        int choice = JOptionPane.showConfirmDialog(this, 
-            "Are you sure you want to start a new game? Current progress will be lost.",
-            "New Game", JOptionPane.YES_NO_OPTION);
-        
-        if (choice == JOptionPane.YES_OPTION) {
-            this.dispose();
-            new MenuGUI();
-        }
-    }
-    
-    private void toggleMusic() {
-        musicOn = !musicOn;
-        musicBtn.setText(musicOn ? "🔊 Music ON" : "🔇 Music OFF");
-    }
-    
-    private void checkBoardCompletion() {
-        boolean[][] validation = controller.verifyGame(gameBoard);
-        boolean isValid = true;
-        
-        if (validation != null) {
-            for (int row = 0; row < 9; row++) {
-                for (int col = 0; col < 9; col++) {
-                    if (!validation[row][col]) {
-                        isValid = false;
-                        break;
-                    }
-                }
-                if (!isValid) break;
+            
+            if (updatedBoard == null) {
+                JOptionPane.showMessageDialog(this, "No moves to undo!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                return;
             }
             
-            if (isValid) {
-                JOptionPane.showMessageDialog(this, 
-                    "🎉 Congratulations! You solved the puzzle correctly! 🎉",
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
-            }
-        }
-    }
-    
-    private void refreshBoard() {
-        for (int row = 0; row < 9; row++) {
-            for (int col = 0; col < 9; col++) {
-                if (originalBoard[row][col] == 0) {
-                    if (gameBoard[row][col] == 0) {
-                        cells[row][col].setText("");
-                    } else {
-                        cells[row][col].setText(String.valueOf(gameBoard[row][col]));
+            for (int row = 0; row < 9; row++) {
+                for (int col = 0; col < 9; col++) {
+                    if (originalBoard[row][col] == 0) {
+                        gameBoard[row][col] = updatedBoard[row][col];
+                        cells[row][col].setText(updatedBoard[row][col] == 0 ? "" : String.valueOf(updatedBoard[row][col]));
+                        cells[row][col].setBackground(EDITABLE_CELL_BG);
                     }
                 }
             }
+            
+            emptyCells = countEmptyCells();
+            emptyCellsLabel.setText("Empty cells: " + emptyCells);
+            solveBtn.setEnabled(emptyCells == 5);
+            
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error undoing move!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
-    private void updateSolveButtonState() {
-        solveBtn.setEnabled(emptyCells == 5);
-        if (!solveBtn.isEnabled()) {
-            solveBtn.setBackground(new Color(180, 180, 180));
-        } else {
-            solveBtn.setBackground(BUTTON_SOLVE);
+    
+    private String getDifficultyName() {
+        switch (difficulty) {
+            case 'e': case 'E': return "EASY";
+            case 'm': case 'M': return "MEDIUM";
+            case 'h': case 'H': return "HARD";
+            case 'i': case 'I': return "INCOMPLETE";
+            default: return "UNKNOWN";
         }
     }
     
@@ -463,23 +370,5 @@ public class SudokuGUI extends JFrame {
             System.arraycopy(board[i], 0, copy[i], 0, 9);
         }
         return copy;
-    }
-    
-    private String getDifficultyName() {
-        switch (difficulty) {
-            case 'e':
-            case 'E':
-                return "EASY";
-            case 'm':
-            case 'M':
-                return "MEDIUM";
-            case 'h':
-            case 'H':
-                return "HARD";
-            case 'i':
-                return "INCOMPLETE";
-            default:
-                return "UNKNOWN";
-        }
     }
 }

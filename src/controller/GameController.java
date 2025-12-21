@@ -112,20 +112,25 @@ public  class GameController implements Viewable {
 
     @Override
     public Game undoLastMove(int[][]board) throws IOException {
-       LogFileHandler handler=new LogFileHandler();
-       String lastMove= handler.readAndRemoveLastMove();
-         lastMove = lastMove.replaceAll("[()]", "");
-        String[] parts = lastMove.split(",");
-        if(parts==null){
-            return null;
-        }
-      int row= Integer.parseInt(parts[0].trim());
-      int colomn=  Integer.parseInt(parts[1].trim());
-      int previous=  Integer.parseInt(parts[3].trim());
-      board[row][colomn]=previous;
-      return new Game(board);
-      
-      
+       LogFileHandler handler = new LogFileHandler();
+       String lastMove = handler.readAndRemoveLastMove();
+       
+       if (lastMove == null || lastMove.trim().isEmpty()) {
+           return null;
+       }
+       
+       lastMove = lastMove.replaceAll("[()]", "");
+       String[] parts = lastMove.split(",");
+       
+       if (parts.length < 4) {
+           return null;
+       }
+       
+       int row = Integer.parseInt(parts[0].trim());
+       int colomn = Integer.parseInt(parts[1].trim());
+       int previous = Integer.parseInt(parts[3].trim());
+       board[row][colomn] = previous;
+       return new Game(board);
     }
       
      
