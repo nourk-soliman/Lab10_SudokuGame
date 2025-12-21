@@ -1,7 +1,5 @@
 package view;
 
-import view.adapter.Controllable;
-import view.adapter.ControllerAdapter;
 import controller.GameController;
 import controller.GameDriver;
 import controller.Viewable;
@@ -9,9 +7,11 @@ import controller.exceptions.NotFoundException;
 import controller.exceptions.SolutionInvalidException;
 import controller.system.GameStorage;
 import java.awt.*;
+import java.io.File;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.io.File;
+import view.adapter.Controllable;
+import view.adapter.ControllerAdapter;
 
 public class MenuGUI extends JFrame {
     

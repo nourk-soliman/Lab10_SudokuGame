@@ -1,13 +1,13 @@
 package view;
 
-import view.adapter.Controllable;
-import view.model.UserAction;
 import controller.exceptions.InvalidGame;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import javax.swing.*;
 import javax.swing.border.*;
-import java.io.IOException;
+import view.adapter.Controllable;
+import view.model.UserAction;
 
 public class SudokuGUI extends JFrame {
     
@@ -28,6 +28,9 @@ public class SudokuGUI extends JFrame {
     private final Color BUTTON_SOLVE = new Color(85, 170, 255);
     private final Color BUTTON_UNDO = new Color(253, 203, 110);
     private final Color BUTTON_NEW = new Color(255, 118, 117);
+    
+    // Flag to prevent recursive updates during programmatic changes
+    private boolean isUpdatingProgrammatically = false;
 
     public SudokuGUI(Controllable controller, int[][] game, char difficulty) {
         this.controller = controller;
@@ -148,6 +151,11 @@ public class SudokuGUI extends JFrame {
             public void insertUpdate(javax.swing.event.DocumentEvent e) { updateCell(); }
             
             private void updateCell() {
+                // Skip if this is a programmatic update (e.g., from undo)
+                if (isUpdatingProgrammatically) {
+                    return;
+                }
+                
                 SwingUtilities.invokeLater(() -> {
                     String text = cell.getText();
                     if (text.length() > 1) {
@@ -195,17 +203,17 @@ public class SudokuGUI extends JFrame {
         int horizontalPadding = Math.max(20, (getWidth() - 500) / 4);
         panel.setBorder(new EmptyBorder(10, horizontalPadding, 10, horizontalPadding));
         
-        verifyBtn = createStyledButton("✓ VERIFY", BUTTON_VERIFY);
+        verifyBtn = createStyledButton("VERIFY", BUTTON_VERIFY);
         verifyBtn.addActionListener(e -> verifyGame());
         
-        solveBtn = createStyledButton("🧩 SOLVE", BUTTON_SOLVE);
+        solveBtn = createStyledButton("SOLVE", BUTTON_SOLVE);
         solveBtn.addActionListener(e -> solveGame());
         solveBtn.setEnabled(emptyCells == 5);
         
-        undoBtn = createStyledButton("↶ UNDO", BUTTON_UNDO);
+        undoBtn = createStyledButton("UNDO", BUTTON_UNDO);
         undoBtn.addActionListener(e -> undoLastMove());
         
-        newGameBtn = createStyledButton("🔄 NEW GAME", BUTTON_NEW);
+        newGameBtn = createStyledButton("NEW GAME", BUTTON_NEW);
         newGameBtn.addActionListener(e -> {
             int choice = JOptionPane.showConfirmDialog(
                 this,
@@ -251,12 +259,24 @@ public class SudokuGUI extends JFrame {
             }
             
             boolean allValid = true;
+            boolean hasEmptyCells = false;
+            
+            // Reset all editable cells to white background first
             for (int row = 0; row < 9; row++) {
                 for (int col = 0; col < 9; col++) {
                     if (originalBoard[row][col] == 0) {
-                        if (validity[row][col]) {
-                            cells[row][col].setBackground(EDITABLE_CELL_BG);
-                        } else {
+                        cells[row][col].setBackground(EDITABLE_CELL_BG);
+                    }
+                }
+            }
+            
+            // Now highlight invalid cells and check status
+            for (int row = 0; row < 9; row++) {
+                for (int col = 0; col < 9; col++) {
+                    if (originalBoard[row][col] == 0) {
+                        if (gameBoard[row][col] == 0) {
+                            hasEmptyCells = true;
+                        } else if (!validity[row][col]) {
                             cells[row][col].setBackground(INVALID_CELL_BG);
                             allValid = false;
                         }
@@ -264,14 +284,30 @@ public class SudokuGUI extends JFrame {
                 }
             }
             
-            if (allValid && emptyCells == 0) {
-                JOptionPane.showMessageDialog(this, "Congratulations! You solved it!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            } else if (allValid) {
-                JOptionPane.showMessageDialog(this, "So far, so good! Keep going!", "Valid", JOptionPane.INFORMATION_MESSAGE);
+            // Display appropriate message
+            if (!allValid) {
+                JOptionPane.showMessageDialog(this, 
+                    "Some cells are incorrect (shown in red).", 
+                    "Invalid", 
+                    JOptionPane.WARNING_MESSAGE);
+            } else if (hasEmptyCells) {
+                JOptionPane.showMessageDialog(this, 
+                    "So far, so good! Keep going!", 
+                    "Valid (Incomplete)", 
+                    JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Some cells are incorrect (shown in red)", "Invalid", JOptionPane.WARNING_MESSAGE);
+                // All filled and valid - game complete!
+                JOptionPane.showMessageDialog(this, 
+                    "Congratulations! You solved the puzzle!", 
+                    "Success", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                
+                // Delete the completed game
+                deleteCurrentGame();
             }
+            
         } catch (Exception ex) {
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(this, 
                 "Error verifying game: " + ex.getMessage(), 
                 "Error", 
@@ -281,7 +317,10 @@ public class SudokuGUI extends JFrame {
     
     private void solveGame() {
         if (emptyCells != 5) {
-            JOptionPane.showMessageDialog(this, "Solve only works when exactly 5 cells are empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Solve only works when exactly 5 cells are empty!", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
             return;
         }
         
@@ -294,9 +333,15 @@ public class SudokuGUI extends JFrame {
             System.out.println("Solutions returned: " + (solutions != null ? solutions.length : "null"));
             
             if (solutions == null || solutions.length == 0) {
-                JOptionPane.showMessageDialog(this, "No solution found!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, 
+                    "No solution found!", 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            
+            // Set flag to prevent document listeners from firing
+            isUpdatingProgrammatically = true;
             
             for (int i = 0; i < solutions.length; i++) {
                 int row = solutions[i][0];
@@ -310,48 +355,127 @@ public class SudokuGUI extends JFrame {
                 cells[row][col].setBackground(new Color(200, 255, 200));
             }
             
+            // Re-enable document listeners
+            isUpdatingProgrammatically = false;
+            
             emptyCells = 0;
             emptyCellsLabel.setText("Empty cells: 0");
             solveBtn.setEnabled(false);
             
-            JOptionPane.showMessageDialog(this, "Puzzle solved!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            saveCurrentGameState();
+            
+            JOptionPane.showMessageDialog(this, 
+                "Puzzle solved!", 
+                "Success", 
+                JOptionPane.INFORMATION_MESSAGE);
             
         } catch (InvalidGame ex) {
             System.err.println("Solve error: " + ex.getMessage());
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Error: " + ex.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             System.err.println("Unexpected error: " + ex.getMessage());
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Unexpected error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Unexpected error: " + ex.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
     
     private void undoLastMove() {
         try {
+            // Store the current state before undo for comparison
+            int[][] boardBeforeUndo = copyBoard(gameBoard);
+            
             int[][] updatedBoard = controller.undoLastMove(gameBoard);
             
             if (updatedBoard == null) {
-                JOptionPane.showMessageDialog(this, "No moves to undo!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, 
+                    "No moves to undo!", 
+                    "Info", 
+                    JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
             
-            for (int row = 0; row < 9; row++) {
-                for (int col = 0; col < 9; col++) {
-                    if (originalBoard[row][col] == 0 && gameBoard[row][col] != updatedBoard[row][col]) {
-                        gameBoard[row][col] = updatedBoard[row][col];
-                        cells[row][col].setText(updatedBoard[row][col] == 0 ? "" : String.valueOf(updatedBoard[row][col]));
-                        cells[row][col].setBackground(EDITABLE_CELL_BG);
-                    }
-                }
-            }
+            System.out.println("=== UNDO OPERATION START ===");
             
-            emptyCells = countEmptyCells();
-            emptyCellsLabel.setText("Empty cells: " + emptyCells);
-            solveBtn.setEnabled(emptyCells == 5);
+            // Set flag to prevent document listeners from firing during our updates
+            isUpdatingProgrammatically = true;
+            
+            // Update GUI on Event Dispatch Thread
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    for (int row = 0; row < 9; row++) {
+                        for (int col = 0; col < 9; col++) {
+                            if (originalBoard[row][col] == 0) {
+                                // Only update editable cells
+                                int oldValue = boardBeforeUndo[row][col];
+                                int newValue = updatedBoard[row][col];
+                                
+                                if (oldValue != newValue) {
+                                    System.out.println("Updating cell [" + row + "," + col + "] from " + oldValue + " to " + newValue);
+                                    
+                                    JTextField cell = cells[row][col];
+                                    
+                                    // Method 1: Direct document manipulation
+                                    javax.swing.text.Document doc = cell.getDocument();
+                                    try {
+                                        // Remove all text first
+                                        if (doc.getLength() > 0) {
+                                            doc.remove(0, doc.getLength());
+                                        }
+                                        // Insert new text if not zero
+                                        if (newValue != 0) {
+                                            doc.insertString(0, String.valueOf(newValue), null);
+                                        }
+                                    } catch (javax.swing.text.BadLocationException e) {
+                                        // Fallback to setText
+                                        cell.setText(newValue == 0 ? "" : String.valueOf(newValue));
+                                    }
+                                    
+                                    // Reset background
+                                    cell.setBackground(EDITABLE_CELL_BG);
+                                    
+                                    // Force visual update
+                                    cell.revalidate();
+                                    cell.repaint();
+                                    
+                                    System.out.println("  Cell text is now: '" + cell.getText() + "'");
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Update counters
+                    emptyCells = countEmptyCells();
+                    emptyCellsLabel.setText("Empty cells: " + emptyCells);
+                    solveBtn.setEnabled(emptyCells == 5);
+                    
+                    System.out.println("Empty cells after undo: " + emptyCells);
+                    System.out.println("=== UNDO OPERATION END ===");
+                    
+                } finally {
+                    // Re-enable document listeners
+                    isUpdatingProgrammatically = false;
+                }
+            });
+            
+            // Save state after a short delay to allow GUI update to complete
+            SwingUtilities.invokeLater(() -> {
+                saveCurrentGameState();
+            });
             
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Error undoing move: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            isUpdatingProgrammatically = false; // Make sure to reset flag
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                "Error undoing move: " + ex.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
     
