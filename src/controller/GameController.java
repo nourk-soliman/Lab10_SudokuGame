@@ -77,7 +77,7 @@ public  class GameController implements Viewable {
 //-------------------------------------------look  ------------------------------------------------
     @Override
     public String verifyGame(Game game) {//add the invalid state and return it as a string with the duplicates:
-        //ex:  "invalid 1,2 3,3 6,7" the location row and colomn
+        //ex:  "invalid 1,2 3,3 6,7" the location row and colomn, it must be with this exact format because I used it like this in the adapter class.
    try {
             driver.verifySolution(game.getBoard());
             // check if there are zeros -> incomplete
@@ -151,6 +151,7 @@ public  class GameController implements Viewable {
       
      
 }
+
 
 
 
