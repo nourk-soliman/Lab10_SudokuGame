@@ -167,6 +167,9 @@ public class SudokuGUI extends JFrame {
                         return;
                     }
                     
+                    // Reset background when user edits the cell
+                    cell.setBackground(EDITABLE_CELL_BG);
+                    
                     int previousValue = gameBoard[finalRow][finalCol];
                     int newValue = text.isEmpty() ? 0 : Integer.parseInt(text);
                     
@@ -203,17 +206,17 @@ public class SudokuGUI extends JFrame {
         int horizontalPadding = Math.max(20, (getWidth() - 500) / 4);
         panel.setBorder(new EmptyBorder(10, horizontalPadding, 10, horizontalPadding));
         
-        verifyBtn = createStyledButton("VERIFY", BUTTON_VERIFY);
+        verifyBtn = createStyledButton("✓ VERIFY", BUTTON_VERIFY);
         verifyBtn.addActionListener(e -> verifyGame());
         
-        solveBtn = createStyledButton("SOLVE", BUTTON_SOLVE);
+        solveBtn = createStyledButton("🧩 SOLVE", BUTTON_SOLVE);
         solveBtn.addActionListener(e -> solveGame());
         solveBtn.setEnabled(emptyCells == 5);
         
-        undoBtn = createStyledButton("UNDO", BUTTON_UNDO);
+        undoBtn = createStyledButton("↶ UNDO", BUTTON_UNDO);
         undoBtn.addActionListener(e -> undoLastMove());
         
-        newGameBtn = createStyledButton("NEW GAME", BUTTON_NEW);
+        newGameBtn = createStyledButton("🔄 NEW GAME", BUTTON_NEW);
         newGameBtn.addActionListener(e -> {
             int choice = JOptionPane.showConfirmDialog(
                 this,
