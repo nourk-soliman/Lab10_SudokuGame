@@ -48,9 +48,15 @@ public class ControllerAdapter implements Controllable {
         switch (level){
             case 'e':
               return controller.getGame(DifficultyEnum.EASY).getBoard(); 
+            case  'E':
+                 return controller.getGame(DifficultyEnum.EASY).getBoard(); 
             case 'm':
+            controller.getGame(DifficultyEnum.MEDIUM).getBoard();  
+                        case 'M':
             controller.getGame(DifficultyEnum.MEDIUM).getBoard();     
             case'h':
+                controller.getGame(DifficultyEnum.HARD).getBoard();
+            case'H':
                 controller.getGame(DifficultyEnum.HARD).getBoard();
             default:
                 return null;
@@ -148,3 +154,4 @@ public int[][] solveGame(int[][] game) throws InvalidGame {
     }
     
 }
+
