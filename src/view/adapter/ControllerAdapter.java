@@ -52,7 +52,7 @@ public class ControllerAdapter implements Controllable {
                  return controller.getGame(DifficultyEnum.EASY).getBoard(); 
             case 'm':
             controller.getGame(DifficultyEnum.MEDIUM).getBoard();  
-                        case 'M':
+            case 'M':
             controller.getGame(DifficultyEnum.MEDIUM).getBoard();     
             case'h':
                 controller.getGame(DifficultyEnum.HARD).getBoard();
@@ -154,4 +154,5 @@ public int[][] solveGame(int[][] game) throws InvalidGame {
     }
     
 }
+
 
