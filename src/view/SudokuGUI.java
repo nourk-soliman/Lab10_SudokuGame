@@ -319,6 +319,10 @@ public class SudokuGUI extends JFrame {
                 
                 // Delete the completed game
                 deleteCurrentGame();
+                
+                // Close this window and return to menu
+                dispose();
+                new MenuGUI();
             }
             
         } catch (Exception ex) {
@@ -377,12 +381,15 @@ public class SudokuGUI extends JFrame {
             emptyCellsLabel.setText("Empty cells: 0");
             solveBtn.setEnabled(false);
             
-            saveCurrentGameState();
-            
             JOptionPane.showMessageDialog(this, 
                 "Puzzle solved!", 
                 "Success", 
                 JOptionPane.INFORMATION_MESSAGE);
+            
+            // Delete the completed game and return to menu
+            deleteCurrentGame();
+            dispose();
+            new MenuGUI();
             
         } catch (InvalidGame ex) {
             System.err.println("Solve error: " + ex.getMessage());
