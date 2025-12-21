@@ -9,6 +9,8 @@ import controller.Viewable;
 import controller.exceptions.InvalidGame;
 import controller.exceptions.NotFoundException;
 import controller.exceptions.SolutionInvalidException;
+import controller.logic.CellFlyweight;
+import controller.logic.Solver;
 import controller.model.DifficultyEnum;
 import controller.model.Game;
 import controller.system.GameCatalog;
@@ -73,12 +75,42 @@ public class ControllerAdapter implements Controllable {
     public boolean[][] verifyGame(int[][] game) {
          /* GameStorage gameStorage=new GameStorage();
          Game newGame=new Game(game);
+         controller.driveGames(newGame);*/return null;
+         /* GameStorage gameStorage=new GameStorage();
+         Game newGame=new Game(game);
          controller.driveGames(newGame);*/
     }
 
     @Override
     public int[][] solveGame(int[][] game) throws InvalidGame {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+   if (game == null) {
+        throw new InvalidGame("The game board is null");
+    }
+
+   
+    Game tempGame = new Game(game);
+
+   
+    CellFlyweight[] emptyCells = new Game(game).findEmptyCells(game);
+
+   
+    boolean solved = Solver.solve(game);
+
+    if (!solved) {
+        throw new InvalidGame("No valid solution found for the game");
+    }
+
+  
+    int[][] solvedCells = new int[emptyCells.length][3]; // row, col, value
+    for (int i = 0; i < emptyCells.length; i++) {
+        int row = emptyCells[i].getRow();
+        int col = emptyCells[i].getCol();
+        solvedCells[i][0] = row;
+        solvedCells[i][1] = col;
+        solvedCells[i][2] = game[row][col]; 
+    }
+
+    return solvedCells;
     }
 
     @Override

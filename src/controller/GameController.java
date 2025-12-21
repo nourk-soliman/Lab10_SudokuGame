@@ -6,6 +6,8 @@ package controller;
 import controller.exceptions.InvalidGame;
 import controller.exceptions.NotFoundException;
 import controller.exceptions.SolutionInvalidException;
+import controller.logic.CellFlyweight;
+import controller.logic.Solver;
 import java.io.File;
 import controller.system.GameCatalog;
 import java.io.IOException;
@@ -27,6 +29,8 @@ public  class GameController implements Viewable {
         this.driver = driver;
         this.storage = storage;
     }  
+
+   
     
     @Override
     public GameCatalog getCatalog(){
@@ -70,7 +74,7 @@ public  class GameController implements Viewable {
         }
         driver.generateFromSolved(sourceGame.getBoard()); 
     }
-
+//-------------------------------------------look  ------------------------------------------------
     @Override
     public String verifyGame(Game game) {
    try {
@@ -93,7 +97,29 @@ public  class GameController implements Viewable {
 
     @Override
     public int[] solveGame(Game game) throws InvalidGame {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+   if (game == null || game.getBoard() == null) {
+        throw new InvalidGame("The game or board is null");
+    }
+
+    int[][] board = game.getBoard();
+
+    
+    CellFlyweight[] emptyCells = new Game(board).findEmptyCells(board);
+
+    
+    boolean solved = Solver.solve(board);
+
+    if (!solved) {
+        throw new InvalidGame("No valid solution found for the game");
+    }
+
+    
+    int[] solvedValues = new int[emptyCells.length];
+    for (int i = 0; i < emptyCells.length; i++) {
+        solvedValues[i] = board[emptyCells[i].getRow()][emptyCells[i].getCol()];
+    }
+
+    return solvedValues;
     }
 
     @Override
@@ -122,12 +148,7 @@ public  class GameController implements Viewable {
       
     }
         //testing the catalog method
-        public static void main(String[] args) {
-        GameController controller=new GameController();
-        GameCatalog catalog=controller.getCatalog();
-        System.out.println("Current: "+catalog.isCurrent()+" allModes: "+catalog.isAllModesExist());
-    }
-    
+     
 }
 
 
